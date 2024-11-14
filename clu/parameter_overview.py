@@ -20,7 +20,6 @@ from typing import Any
 
 from absl import logging
 
-import flax
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -70,7 +69,7 @@ def flatten_dict(
   output_dict = {}
   for key, value in input_dict.items():
     nested_key = f"{prefix}{delimiter}{key}" if prefix else key
-    if isinstance(value, (dict, flax.core.FrozenDict)):
+    if isinstance(value, Mapping):
       output_dict.update(
           flatten_dict(value, prefix=nested_key, delimiter=delimiter)
       )
@@ -160,7 +159,7 @@ def _get_parameter_rows(
     A list of `ParamRow`, or `ParamRowWithStats`, depending on the passed value
     of `include_stats`.
   """
-  if not isinstance(params, (dict, flax.core.FrozenDict)):
+  if not isinstance(params, Mapping):
     raise ValueError(
         f"Expected `params` to be a dictionary but got {type(params)}"
     )
@@ -277,7 +276,7 @@ def _get_parameter_overview(
     max_lines: int | None = None,
 ) -> str:
   """See get_parameter_overview()."""
-  if include_stats is True and isinstance(params, (dict, flax.core.FrozenDict)):  # pylint: disable=g-bool-id-comparison
+  if include_stats is True and isinstance(params, Mapping):  # pylint: disable=g-bool-id-comparison
     params = jax.device_get(params)  # A no-op if already numpy array.
   rows = _get_parameter_rows(params, include_stats=include_stats)
   RowType = {  # pylint: disable=invalid-name
