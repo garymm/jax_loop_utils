@@ -1,0 +1,43 @@
+[project]
+name = "jlu"
+version = "0.0.12"
+description = "Libraries for ML training loops in JAX."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache 2.0" }
+authors = [{ name = "Astera Institute", email = "no-reply@astera.org" }]
+dependencies = [
+    "absl-py",
+    "etils[epath,epy]",
+    "flax",
+    "jax",
+    "jaxlib",
+    "ml_collections",
+    "numpy",
+    "packaging",
+    "typing_extensions",
+    "wrapt",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+keywords = ["JAX", "machine learning"]
+
+[project.urls]
+Homepage = "http://github.com/google/CommonLoopUtils"
+
+[project.optional-dependencies]
+test = ["pytest", "tensorflow", "tensorflow_datasets", "torch>=2.0.0"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools]
+packages = ["jlu"]
