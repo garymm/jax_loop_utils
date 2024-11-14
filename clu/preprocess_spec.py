@@ -46,7 +46,13 @@ from typing import Dict, List, Sequence, Tuple, Type, TypeVar, Union
 from absl import logging
 from flax import traverse_util
 import jax.numpy as jnp
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    raise ImportError(
+        "tensorflow is required to use preprocess_spec. "
+        + "Install jax_loop_utils with the tf-data extra."
+    )
 import typing_extensions
 from typing_extensions import Protocol
 

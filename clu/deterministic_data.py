@@ -62,8 +62,14 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 from packaging import version
-import tensorflow as tf
-import tensorflow_datasets as tfds
+try:
+    import tensorflow as tf
+    import tensorflow_datasets as tfds
+except ImportError:
+    raise ImportError(
+        "tensorflow and tensorflow_datasets are required to use "
+        + "deterministic_data. Install jax_loop_utils with the tf-data extra."
+    )
 import typing_extensions
 
 # TODO(b/200953513): Migrate away from logging imports (on module level)

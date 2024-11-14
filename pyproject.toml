@@ -9,7 +9,6 @@ authors = [{ name = "Astera Institute", email = "no-reply@astera.org" }]
 dependencies = [
     "absl-py",
     "etils[epath,epy]",
-    "flax",
     "jax",
     "jaxlib",
     "ml_collections",
@@ -32,7 +31,8 @@ keywords = ["JAX", "machine learning"]
 Homepage = "http://github.com/Astera-org/jax_loop_utils"
 
 [project.optional-dependencies]
-test = ["pytest"] #, "tensorflow", "tensorflow_datasets", "torch>=2.0.0"]
+tf-data = ["tensorflow", "tensorflow_datasets"]
+test = ["flax", "pytest", "tensorflow", "tensorflow_datasets"]
 
 [build-system]
 requires = ["setuptools"]
