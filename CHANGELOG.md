@@ -127,3 +127,4 @@ Last release before dropping support for Python 3.8 and 3.9
 -   Switch from setup.py to pyproject.toml + UV.
 -   Delete checkpoint module. It's specific to TensorFlow and Flax.
 -   Remove flax dependency from metrics module.
+-   Separate TF dataset iterator from generic dataset iterator.

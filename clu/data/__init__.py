@@ -22,7 +22,16 @@ from clu.data.dataset_iterator import (
     DatasetIterator,
     Element,
     ElementSpec,
-    TfDatasetIterator,
     PeekableDatasetIterator,
     PyTree,
 )
+
+all = [
+    "Array",
+    "ArraySpec",
+    "DatasetIterator",
+    "Element",
+    "ElementSpec",
+    "PeekableDatasetIterator",
+    "PyTree",
+]

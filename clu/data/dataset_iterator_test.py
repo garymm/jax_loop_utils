@@ -18,7 +18,7 @@ import pathlib
 import tempfile
 
 from absl.testing import parameterized
-from clu.data import dataset_iterator
+from clu.data import dataset_iterator, tf_dataset_iterator
 import numpy as np
 import tensorflow as tf
 
@@ -35,7 +35,7 @@ class DatasetIteratorTest(parameterized.TestCase, tf.test.TestCase):
     # Remove index 1 and 3.
     ds = ds.filter(lambda x: tf.logical_and(x["prime"] != 3, x["prime"] != 7))
     ds = ds.batch(2, drop_remainder=True)
-    return dataset_iterator.TfDatasetIterator(ds, checkpoint=checkpoint)
+    return tf_dataset_iterator.TfDatasetIterator(ds, checkpoint=checkpoint)
 
   def test_tf_iterator(self):
     it = self._create_iterator(0)
