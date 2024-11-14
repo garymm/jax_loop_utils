@@ -22,7 +22,7 @@ from absl.testing import parameterized
 import chex
 from clu import asynclib
 from clu import metrics
-import flax
+from clu.internal import flax
 import jax
 import jax.numpy as jnp
 import numpy as np

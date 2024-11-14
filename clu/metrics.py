@@ -63,7 +63,7 @@ from absl import logging
 
 from clu.internal import utils
 import clu.values
-import flax
+from clu.internal import flax
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -245,7 +245,6 @@ class Metric:
       `model_output`.
     """
 
-    @flax.struct.dataclass
     class FromFun(cls):
       """Wrapper Metric class that collects output after applying `fun`."""
 
@@ -647,7 +646,7 @@ class Collection:
     Returns:
       Unreplicated collection
     """
-    return flax.jax_utils.unreplicate(self)
+    return jax.tree_util.tree_map(lambda x: x[0], self)
 
 
 # Sentinel to make LastValue.__init__ support tree manipulations that use None.

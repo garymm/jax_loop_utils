@@ -29,10 +29,10 @@ classifiers = [
 keywords = ["JAX", "machine learning"]
 
 [project.urls]
-Homepage = "http://github.com/google/CommonLoopUtils"
+Homepage = "http://github.com/Astera-org/jax_loop_utils"
 
 [project.optional-dependencies]
-test = ["pytest", "tensorflow", "tensorflow_datasets", "torch>=2.0.0"]
+test = ["pytest"] #, "tensorflow", "tensorflow_datasets", "torch>=2.0.0"]
 
 [build-system]
 requires = ["setuptools"]
@@ -40,4 +40,4 @@ build-backend = "setuptools.build_meta"
 
 
 [tool.setuptools]
-packages = ["jlu"]
+packages = ["clu"]
