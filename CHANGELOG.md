@@ -120,3 +120,10 @@ Last release before dropping support for Python 3.8 and 3.9
 -   Switch from `jax.tree_map` (deprecated since JAX 0.4.26) to
     `jax.tree_util.tree_map`.
 -   Improvements to parameter overview.
+
+## Unreleased
+
+-   Fork from google/CommonLoopUtils (clu) to Astera-org/jax_loop_utils (jlu).
+-   Switch from setup.py to pyproject.toml + UV.
+-   Delete checkpoint module. It's specific to TensorFlow and Flax.
+-   Remove flax dependency from metrics module.
