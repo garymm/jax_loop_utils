@@ -16,12 +16,15 @@
 # pylint: disable=g-importing-member
 
 import itertools
+import shutil
+import tempfile
 from typing import Any
 from unittest import mock
 
 from absl.testing import absltest
 from absl.testing import parameterized
 from clu import values
+from clu.internal import flax
 from clu.metric_writers import utils
 from clu.metric_writers.async_writer import AsyncMultiWriter
 from clu.metric_writers.async_writer import AsyncWriter
@@ -30,9 +33,7 @@ from clu.metric_writers.logging_writer import LoggingWriter
 from clu.metric_writers.multi_writer import MultiWriter
 from clu.metric_writers.summary_writer import SummaryWriter
 import clu.metrics
-import flax.struct
 import jax.numpy as jnp
-import tensorflow as tf
 
 
 @flax.struct.dataclass
@@ -114,7 +115,7 @@ class ONEOF(object):
     return "<ONEOF({})>".format(",".join(repr(i) for i in self._c))
 
 
-class MetricWriterTest(tf.test.TestCase, parameterized.TestCase):
+class MetricWriterTest(parameterized.TestCase):
 
   def test_write(self):
     writer = mock.Mock(spec_set=MetricWriter)
@@ -196,9 +197,9 @@ class MetricWriterTest(tf.test.TestCase, parameterized.TestCase):
 
 
   def test_create_default_writer_summary_writer_is_added(self):
-    writer = utils.create_default_writer(
-        logdir=self.get_temp_dir(), asynchronous=False
-    )
+    temp_dir = tempfile.mkdtemp()
+    self.addCleanup(shutil.rmtree, temp_dir)
+    writer = utils.create_default_writer(logdir=temp_dir, asynchronous=False)
     self.assertTrue(any(isinstance(w, SummaryWriter) for w in writer._writers))
     writer = utils.create_default_writer(logdir=None, asynchronous=False)
     self.assertFalse(any(isinstance(w, SummaryWriter) for w in writer._writers))
