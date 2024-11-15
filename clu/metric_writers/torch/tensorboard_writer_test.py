@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for TorchTensorboardWriter."""
+"""Tests for TensorboardWriter."""
 
 import collections
 import os
 from typing import Any, Dict
 
-from clu.metric_writers import torch_tensorboard_writer
+from clu.metric_writers.torch import tensorboard_writer
 import numpy as np
 import tensorflow as tf
 
@@ -59,12 +59,12 @@ def _load_histograms_data(logdir: str) -> Dict[int, Dict[str, Any]]:
   return data
 
 
-class TorchTensorboardWriterTest(tf.test.TestCase):
+class TensorboardWriterTest(tf.test.TestCase):
 
   def setUp(self):
     super().setUp()
     self.logdir = self.get_temp_dir()
-    self.writer = torch_tensorboard_writer.TorchTensorboardWriter(self.logdir)
+    self.writer = tensorboard_writer.TensorboardWriter(self.logdir)
 
   def test_write_scalar(self):
     self.writer.write_scalars(11, {"a": 0.6, "b": 15})

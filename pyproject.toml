@@ -32,7 +32,7 @@ Homepage = "http://github.com/Astera-org/jax_loop_utils"
 
 [project.optional-dependencies]
 tf-data = ["tensorflow", "tensorflow_datasets"]
-test = ["flax", "pytest", "tensorflow", "tensorflow_datasets"]
+test = ["flax", "pytest", "torch>=2.0", "tensorflow", "tensorflow_datasets"]
 
 [build-system]
 requires = ["setuptools"]

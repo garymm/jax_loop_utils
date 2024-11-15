@@ -29,7 +29,7 @@ Array = interface.Array
 Scalar = interface.Scalar
 
 
-class TorchTensorboardWriter(interface.MetricWriter):
+class TensorboardWriter(interface.MetricWriter):
   """MetricWriter that writes Pytorch summary files."""
 
   def __init__(self, logdir: str):
