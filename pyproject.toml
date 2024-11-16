@@ -35,10 +35,13 @@ tf-data = ["tensorflow", "tensorflow_datasets"]
 test = [
     "flax",
     "pytest",
-    "torch>=2.0",
+    "tensorflow_datasets>=4.9.2",
+    "tensorflow-metadata>=1.0",
     "tensorflow>=2.0",
-    "tensorflow_datasets",
+    "torch>=2.0",
 ]
+# for synopsis.ipynb
+synopsis = ["chex", "flax", "ipykernel", "matplotlib"]
 
 [build-system]
 requires = ["setuptools"]

@@ -13,3 +13,7 @@
 # limitations under the License.
 
 """Package __init__ file."""
+
+from .summary_writer import SummaryWriter
+
+__all__ = ["SummaryWriter"]
