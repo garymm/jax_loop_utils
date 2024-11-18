@@ -15,9 +15,6 @@
 """Tests for interface."""
 # pylint: disable=g-importing-member
 
-import itertools
-import shutil
-import tempfile
 from typing import Any
 from unittest import mock
 

@@ -22,20 +22,12 @@ method of the writer depending on the type of the metric.
 # pylint: disable=g-importing-member
 
 import collections
-import getpass
-import os
-import re
-from typing import Any, List, Mapping, Optional, Tuple, Union
+from typing import Any, Mapping, Union
 
 from absl import flags
-from absl import logging
 from jax_loop_utils import values
-from jax_loop_utils.metric_writers.async_writer import AsyncMultiWriter
 from jax_loop_utils.metric_writers.interface import MetricWriter
-from jax_loop_utils.metric_writers.logging_writer import LoggingWriter
-from jax_loop_utils.metric_writers.multi_writer import MultiWriter
-from jax_loop_utils.metric_writers.tf.summary_writer import SummaryWriter
-from etils import epath
+
 import jax.numpy as jnp
 import numpy as np
 
