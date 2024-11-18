@@ -32,7 +32,7 @@ pyright = ["pyright"]
 # for synopsis.ipynb
 synopsis = ["chex", "flax", "ipykernel", "matplotlib"]
 tensorflow = ["tensorflow>=2.12"]
-test = ["chex", "ml_collections", "pytest", "pytest-cov"]
+test = ["chex", "pytest", "pytest-cov"]
 torch = ["torch>=2.0"]
 
 [build-system]

@@ -17,7 +17,6 @@ from unittest import mock
 from absl.testing import absltest
 from jax_loop_utils.internal import utils
 import jax.numpy as jnp
-import ml_collections
 
 
 class TestError(BaseException):
@@ -91,13 +90,13 @@ class HelpersTest(absltest.TestCase):
   def test_flatten_dict(self):
     self.assertEqual(
         utils.flatten_dict(
-            ml_collections.ConfigDict({
+            {
                 "x": 1,
                 "y": None,
-                "z": ml_collections.ConfigDict({
+                "z": {
                     "a": "bc",
-                })
-            })), [("x", 1), ("y", ""), ("z.a", "bc")])
+                }
+            }), [("x", 1), ("y", ""), ("z.a", "bc")])
 
 
 if __name__ == "__main__":
