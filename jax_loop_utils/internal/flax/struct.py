@@ -17,12 +17,9 @@
 from collections.abc import Callable
 import dataclasses
 import functools
-from typing import TypeVar, overload
+from typing import dataclass_transform, TypeVar, overload
 
 import jax
-from typing_extensions import (
-  dataclass_transform,  # pytype: disable=not-supported-yet
-)
 
 _T = TypeVar('_T')
 
