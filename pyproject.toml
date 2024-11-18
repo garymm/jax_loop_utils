@@ -3,18 +3,15 @@ name = "jax_loop_utils"
 version = "0.0.12"
 description = "Libraries for ML training loops in JAX."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { text = "Apache 2.0" }
 authors = [{ name = "Astera Institute", email = "no-reply@astera.org" }]
 dependencies = [
     "absl-py",
     "etils[epath,epy]",
     "jax",
-    "jaxlib",
-    "ml_collections",
     "numpy",
     "packaging",
-    "typing_extensions",
     "wrapt",
 ]
 classifiers = [
@@ -31,17 +28,12 @@ keywords = ["JAX", "machine learning"]
 Homepage = "http://github.com/Astera-org/jax_loop_utils"
 
 [project.optional-dependencies]
-tf-data = ["tensorflow", "tensorflow_datasets"]
-test = [
-    "flax",
-    "pytest",
-    "tensorflow_datasets>=4.9.2",
-    "tensorflow-metadata>=1.0",
-    "tensorflow>=2.0",
-    "torch>=2.0",
-]
+pyright = ["pyright"]
 # for synopsis.ipynb
 synopsis = ["chex", "flax", "ipykernel", "matplotlib"]
+tensorflow = ["tensorflow>=2.12"]
+test = ["chex", "ml_collections", "pytest", "pytest-cov"]
+torch = ["torch>=2.0"]
 
 [build-system]
 requires = ["setuptools"]
@@ -50,3 +42,13 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["jax_loop_utils"]
+
+[tool.uv]
+
+# restrict to platforms we care about so that version resolution is faster and more likely to succeed
+# (e.g. don't fail if a package isn't built for windows)
+environments = [
+    "sys_platform == 'darwin' and platform_machine == 'arm64'",
+    "sys_platform == 'linux' and platform_machine == 'aarch64'",
+    "sys_platform == 'linux' and platform_machine == 'x86_64'",
+]

@@ -17,14 +17,14 @@
 import time
 from unittest import mock
 
+from absl.testing import absltest
 from jax_loop_utils import asynclib
 from jax_loop_utils.metric_writers import async_writer
 from jax_loop_utils.metric_writers import interface
 import numpy as np
-import tensorflow as tf
 
 
-class AsyncWriterTest(tf.test.TestCase):
+class AsyncWriterTest(absltest.TestCase):
 
   def setUp(self):
     super().setUp()
@@ -153,4 +153,4 @@ class AsyncWriterTest(tf.test.TestCase):
 
 
 if __name__ == "__main__":
-  tf.test.main()
+  absltest.main()

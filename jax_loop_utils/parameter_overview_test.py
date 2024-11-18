@@ -16,7 +16,6 @@
 
 from absl.testing import absltest
 from jax_loop_utils import parameter_overview
-from flax import linen as nn
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -28,7 +27,7 @@ EMPTY_PARAMETER_OVERVIEW = """+------+-------+-------+------+------+-----+
 +------+-------+-------+------+------+-----+
 Total: 0 -- 0 bytes"""
 
-FLAX_CONV2D_PARAMETER_OVERVIEW = """+-------------+--------------+---------+------+
+CONV2D_PARAMETER_OVERVIEW = """+-------------+--------------+---------+------+
 | Name        | Shape        | Dtype   | Size |
 +-------------+--------------+---------+------+
 | conv/bias   | (2,)         | float32 | 2    |
@@ -36,7 +35,7 @@ FLAX_CONV2D_PARAMETER_OVERVIEW = """+-------------+--------------+---------+----
 +-------------+--------------+---------+------+
 Total: 56 -- 224 bytes"""
 
-FLAX_CONV2D_PARAMETER_OVERVIEW_WITH_SHARDING = """+-------------+--------------+---------+------+----------+
+CONV2D_PARAMETER_OVERVIEW_WITH_SHARDING = """+-------------+--------------+---------+------+----------+
 | Name        | Shape        | Dtype   | Size | Sharding |
 +-------------+--------------+---------+------+----------+
 | conv/bias   | (2,)         | float32 | 2    | ()       |
@@ -44,7 +43,7 @@ FLAX_CONV2D_PARAMETER_OVERVIEW_WITH_SHARDING = """+-------------+--------------+
 +-------------+--------------+---------+------+----------+
 Total: 56 -- 224 bytes"""
 
-FLAX_CONV2D_PARAMETER_OVERVIEW_WITH_STATS = """+-------------+--------------+---------+------+------+-----+
+CONV2D_PARAMETER_OVERVIEW_WITH_STATS = """+-------------+--------------+---------+------+------+-----+
 | Name        | Shape        | Dtype   | Size | Mean | Std |
 +-------------+--------------+---------+------+------+-----+
 | conv/bias   | (2,)         | float32 | 2    | 1.0  | 0.0 |
@@ -52,28 +51,13 @@ FLAX_CONV2D_PARAMETER_OVERVIEW_WITH_STATS = """+-------------+--------------+---
 +-------------+--------------+---------+------+------+-----+
 Total: 56 -- 224 bytes"""
 
-FLAX_CONV2D_PARAMETER_OVERVIEW_WITH_STATS_AND_SHARDING = """+-------------+--------------+---------+------+------+-----+----------+
+CONV2D_PARAMETER_OVERVIEW_WITH_STATS_AND_SHARDING = """+-------------+--------------+---------+------+------+-----+----------+
 | Name        | Shape        | Dtype   | Size | Mean | Std | Sharding |
 +-------------+--------------+---------+------+------+-----+----------+
 | conv/bias   | (2,)         | float32 | 2    | 1.0  | 0.0 | ()       |
 | conv/kernel | (3, 3, 3, 2) | float32 | 54   | 1.0  | 0.0 | ()       |
 +-------------+--------------+---------+------+------+-----+----------+
 Total: 56 -- 224 bytes"""
-
-FLAX_CONV2D_MAPPING_PARAMETER_OVERVIEW_WITH_STATS = """+--------------------+--------------+---------+------+------+-----+
-| Name               | Shape        | Dtype   | Size | Mean | Std |
-+--------------------+--------------+---------+------+------+-----+
-| params/conv/bias   | (2,)         | float32 | 2    | 1.0  | 0.0 |
-| params/conv/kernel | (3, 3, 3, 2) | float32 | 54   | 1.0  | 0.0 |
-+--------------------+--------------+---------+------+------+-----+
-Total: 56 -- 224 bytes"""
-
-
-class CNN(nn.Module):
-
-  @nn.compact
-  def __call__(self, x):
-    return nn.Conv(features=2, kernel_size=(3, 3), name="conv")(x)
 
 
 class JaxParameterOverviewTest(absltest.TestCase):
@@ -82,52 +66,45 @@ class JaxParameterOverviewTest(absltest.TestCase):
     self.assertEqual(0, parameter_overview.count_parameters({}))
 
   def test_count_parameters(self):
-    rng = jax.random.PRNGKey(42)
     # Weights of a 2D convolution with 2 filters.
-    variables = CNN().init(rng, jnp.zeros((2, 5, 5, 3)))
+    params = {"conv": {"bias": jnp.ones((2,)), "kernel": jnp.ones((3, 3, 3, 2))}}
     # 3 * 3*3 * 2 + 2 (bias) = 56 parameters
     self.assertEqual(56,
-                     parameter_overview.count_parameters(variables["params"]))
+                     parameter_overview.count_parameters(params))
 
   def test_get_parameter_overview_empty(self):
     self.assertEqual(EMPTY_PARAMETER_OVERVIEW,
                      parameter_overview.get_parameter_overview({}))
 
   def test_get_parameter_overview(self):
-    rng = jax.random.PRNGKey(42)
     # Weights of a 2D convolution with 2 filters.
-    variables = CNN().init(rng, jnp.zeros((2, 5, 5, 3)))
-    variables = jax.tree_util.tree_map(jnp.ones_like, variables)
+    params = {"conv": {"bias": jnp.ones((2,)), "kernel": jnp.ones((3, 3, 3, 2))}}
     self.assertEqual(
-        FLAX_CONV2D_PARAMETER_OVERVIEW,
-        parameter_overview.get_parameter_overview(
-            variables["params"], include_stats=False))
+        CONV2D_PARAMETER_OVERVIEW,
+        parameter_overview.get_parameter_overview(params, include_stats=False))
     self.assertEqual(
-        FLAX_CONV2D_PARAMETER_OVERVIEW_WITH_STATS,
-        parameter_overview.get_parameter_overview(variables["params"]))
-    self.assertEqual(
-        FLAX_CONV2D_MAPPING_PARAMETER_OVERVIEW_WITH_STATS,
-        parameter_overview.get_parameter_overview(variables))
+        CONV2D_PARAMETER_OVERVIEW_WITH_STATS,
+        parameter_overview.get_parameter_overview(params))
     # Add sharding with PartitionSpecs.
     mesh = jax.sharding.Mesh(np.asarray(jax.devices()), "d")
     sharding = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec())
-    variables = jax.jit(lambda x: x, out_shardings=sharding)(variables)
+    params = jax.jit(lambda x: x, out_shardings=sharding)(params)
     self.assertEqual(
-        FLAX_CONV2D_PARAMETER_OVERVIEW_WITH_SHARDING,
+        CONV2D_PARAMETER_OVERVIEW_WITH_SHARDING,
         parameter_overview.get_parameter_overview(
-            variables["params"], include_stats="sharding"))
+            params, include_stats="sharding"))
     self.assertEqual(
-        FLAX_CONV2D_PARAMETER_OVERVIEW_WITH_STATS_AND_SHARDING,
+        CONV2D_PARAMETER_OVERVIEW_WITH_STATS_AND_SHARDING,
         parameter_overview.get_parameter_overview(
-            variables["params"], include_stats="global"))
+            params, include_stats="global"))
 
   def test_get_parameter_overview_shape_dtype_struct(self):
-    variables_shape_dtype_struct = jax.eval_shape(
-        lambda: CNN().init(jax.random.PRNGKey(42), jnp.zeros((2, 5, 5, 3))))
+    params = {"conv": {"bias": jnp.ones((2,)), "kernel": jnp.ones((3, 3, 3, 2))}}
+    params_shape_dtype_struct = jax.eval_shape(lambda: params)
     self.assertEqual(
-        FLAX_CONV2D_PARAMETER_OVERVIEW,
+        CONV2D_PARAMETER_OVERVIEW,
         parameter_overview.get_parameter_overview(
-            variables_shape_dtype_struct["params"], include_stats=False))
+            params_shape_dtype_struct, include_stats=False))
 
   def test_printing_bool(self):
     self.assertEqual(

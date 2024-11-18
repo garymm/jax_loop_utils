@@ -129,3 +129,6 @@ Last release before dropping support for Python 3.8 and 3.9
 -   Remove flax dependency from metrics module.
 -   Separate TF dataset iterator from generic dataset iterator.
 -   Move torch tensorboard and TF summary metric writers to subpackages.
+-   Remove preprocess_spec, deterministic_data, and data modules.
+    These all have TF dependencies and it seems they are probably
+    deprecated by Google in favor of https://github.com/google/grain.

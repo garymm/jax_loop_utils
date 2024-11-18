@@ -16,13 +16,13 @@
 
 from unittest import mock
 
+from absl.testing import absltest
 from jax_loop_utils.metric_writers import interface
 from jax_loop_utils.metric_writers import multi_writer
 import numpy as np
-import tensorflow as tf
 
 
-class MultiWriterTest(tf.test.TestCase):
+class MultiWriterTest(absltest.TestCase):
 
   def setUp(self):
     super().setUp()
@@ -74,4 +74,4 @@ class MultiWriterTest(tf.test.TestCase):
 
 
 if __name__ == "__main__":
-  tf.test.main()
+  absltest.main()

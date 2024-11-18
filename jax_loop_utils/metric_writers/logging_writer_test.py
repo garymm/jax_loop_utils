@@ -14,12 +14,12 @@
 
 """Tests for the LoggingWriter."""
 
+from absl.testing import absltest
 from jax_loop_utils.metric_writers import logging_writer
 import numpy as np
-import tensorflow as tf
 
 
-class LoggingWriterTest(tf.test.TestCase):
+class LoggingWriterTest(absltest.TestCase):
 
   def setUp(self):
     super().setUp()
@@ -136,4 +136,4 @@ class LoggingWriterTest(tf.test.TestCase):
 
 
 if __name__ == "__main__":
-  tf.test.main()
+  absltest.main()
