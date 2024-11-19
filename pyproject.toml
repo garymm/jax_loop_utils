@@ -12,6 +12,7 @@ dependencies = [
     "jax",
     "numpy",
     "packaging",
+    "Pillow",
     "wrapt",
 ]
 classifiers = [
