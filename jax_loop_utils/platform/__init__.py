@@ -20,9 +20,7 @@ a platform independent interface for interactions.
 
 import threading
 
-
-from jax_loop_utils.platform.interface import ArtifactType
-from jax_loop_utils.platform.interface import WorkUnit
+from jax_loop_utils.platform.interface import ArtifactType, WorkUnit
 from jax_loop_utils.platform.local import LocalWorkUnit
 
 # TODO(b/200953513): Migrate away from logging imports (on module level)
@@ -39,3 +37,11 @@ def work_unit() -> WorkUnit:
         with _work_unit_lock:
             _work_unit = LocalWorkUnit()
     return _work_unit
+
+
+__all__ = [
+    "ArtifactType",
+    "LocalWorkUnit",
+    "work_unit",
+    "WorkUnit",
+]

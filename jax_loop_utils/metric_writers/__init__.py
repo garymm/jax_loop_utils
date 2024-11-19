@@ -40,12 +40,11 @@ Usage:
   writer.flush()  # or use metric_writers.ensure_flushes() context.
 """
 
-# pylint: disable=unused-import
-# pylint: disable=g-importing-member
-
-from jax_loop_utils.metric_writers.async_writer import AsyncMultiWriter
-from jax_loop_utils.metric_writers.async_writer import AsyncWriter
-from jax_loop_utils.metric_writers.async_writer import ensure_flushes
+from jax_loop_utils.metric_writers.async_writer import (
+    AsyncMultiWriter,
+    AsyncWriter,
+    ensure_flushes,
+)
 from jax_loop_utils.metric_writers.interface import MetricWriter
 from jax_loop_utils.metric_writers.logging_writer import LoggingWriter
 from jax_loop_utils.metric_writers.multi_writer import MultiWriter
@@ -53,3 +52,13 @@ from jax_loop_utils.metric_writers.utils import write_values
 
 # TODO(b/200953513): Migrate away from logging imports (on module level)
 #                    to logging the actual usage. See b/200953513.
+
+__all__ = [
+    "AsyncMultiWriter",
+    "AsyncWriter",
+    "ensure_flushes",
+    "LoggingWriter",
+    "MetricWriter",
+    "MultiWriter",
+    "write_values",
+]

@@ -17,11 +17,8 @@
 Where results are stored depends on the platform (e.g. TensorBoard).
 """
 
-from collections.abc import Callable, Sequence
 import threading
-from typing import Optional, Protocol
-
-from absl import logging
+from collections.abc import Callable, Sequence
 
 import jax
 
@@ -39,18 +36,18 @@ def start(logdir: str, options=None):
     jax.profiler.start_trace(logdir)
 
 
-def stop() -> Optional[str]:
+def stop() -> str | None:
     """Stops profiling."""
-    jax.profiler.stop_trace()
+    return jax.profiler.stop_trace()
 
 
-CollectCallback = Callable[[Optional[str]], None]
+CollectCallback = Callable[[str | None], None]
 
 
 def collect(
     logdir: str,
     callback: CollectCallback,
-    hosts: Optional[Sequence[str]] = None,
+    hosts: Sequence[str] | None = None,
     duration_ms: int = 3_000,
 ):
     """Calls start() followed by stop() after specified duration."""
