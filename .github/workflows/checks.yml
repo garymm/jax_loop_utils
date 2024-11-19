@@ -9,7 +9,7 @@ on: # yamllint disable-line rule:truthy
   workflow_dispatch:
 jobs:
   unit-tests:
-    runs-on: "ubuntu-24.04"
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v3
@@ -28,6 +28,16 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: Astera-org/jax_loop_utils
           verbose: true
+
+  format:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - name: ruff
+        run: uv run --with ruff ruff check .
 
   # pyright:
   #   runs-on: ubuntu-22.04

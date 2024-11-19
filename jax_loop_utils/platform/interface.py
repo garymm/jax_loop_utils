@@ -20,54 +20,55 @@ from typing import Any
 
 
 class ArtifactType(enum.Enum):
-  # A URL for dashboards, etc.
-  URL = 1
-  # File path.
-  FILE = 2
-  # Directory path.
-  DIRECTORY = 3
+    # A URL for dashboards, etc.
+    URL = 1
+    # File path.
+    FILE = 2
+    # Directory path.
+    DIRECTORY = 3
 
 
 class WorkUnit(abc.ABC):
-  """A work unit represents a single trial in an experiment.
+    """A work unit represents a single trial in an experiment.
 
-  Experiments will usually have multiple work units with different
-  hyperparameters. Each work unit can have multiple jobs (training,
-  evaluation, etc.). And jobs can have multiple tasks when the training
-  is distributed across multiple machines.
-  """
-
-  @property
-  @abc.abstractmethod
-  def experiment_id(self):
-    """ID of the experiment of the work unit."""
-
-  @property
-  @abc.abstractmethod
-  def id(self):
-    """Unique identifier for the work unit."""
-
-  @property
-  def name(self):
-    """Returns the name of the work unit as <XID>/<WID>.
-
-    XID is a ID of the experiment and WID is the number of the work unit
-    within the experiment.
-
-    Returns:
-      The work unit name. e.g. 12345/1.
+    Experiments will usually have multiple work units with different
+    hyperparameters. Each work unit can have multiple jobs (training,
+    evaluation, etc.). And jobs can have multiple tasks when the training
+    is distributed across multiple machines.
     """
-    return f"{self.experiment_id}/{self.id}"
 
-  @abc.abstractmethod
-  def set_notes(self, msg: str):
-    """Sets the notes for this work unit. These are displayed in the UI."""
+    @property
+    @abc.abstractmethod
+    def experiment_id(self):
+        """ID of the experiment of the work unit."""
 
-  @abc.abstractmethod
-  def set_task_status(self, msg: str):
-    """Sets the status string for this task."""
+    @property
+    @abc.abstractmethod
+    def id(self):
+        """Unique identifier for the work unit."""
 
-  @abc.abstractmethod
-  def create_artifact(self, artifact_type: ArtifactType, artifact: Any,
-                      description: str):
-    """Creates an artifact entry for the work unit."""
+    @property
+    def name(self):
+        """Returns the name of the work unit as <XID>/<WID>.
+
+        XID is a ID of the experiment and WID is the number of the work unit
+        within the experiment.
+
+        Returns:
+          The work unit name. e.g. 12345/1.
+        """
+        return f"{self.experiment_id}/{self.id}"
+
+    @abc.abstractmethod
+    def set_notes(self, msg: str):
+        """Sets the notes for this work unit. These are displayed in the UI."""
+
+    @abc.abstractmethod
+    def set_task_status(self, msg: str):
+        """Sets the status string for this task."""
+
+    @abc.abstractmethod
+    def create_artifact(
+        self, artifact_type: ArtifactType, artifact: Any, description: str
+    ):
+        """Creates an artifact entry for the work unit."""

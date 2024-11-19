@@ -16,6 +16,7 @@
 
 Where results are stored depends on the platform (e.g. TensorBoard).
 """
+
 from collections.abc import Callable, Sequence
 import threading
 from typing import Optional, Protocol
@@ -25,39 +26,39 @@ from absl import logging
 import jax
 
 
-
 def start(logdir: str, options=None):
-  """Starts profiling."""
-  if options is not None:
-    raise NotImplementedError(
-        "'options' not supported by clu.profiler.start(). Please file an issue "
-        "at https://github.com/google/jax/issues requesting profiler option "
-        "support if you need this feature.")
-  if logdir is None:
-    raise ValueError("Must specify logdir where profile should be written!")
-  jax.profiler.start_trace(logdir)
+    """Starts profiling."""
+    if options is not None:
+        raise NotImplementedError(
+            "'options' not supported by clu.profiler.start(). Please file an issue "
+            "at https://github.com/google/jax/issues requesting profiler option "
+            "support if you need this feature."
+        )
+    if logdir is None:
+        raise ValueError("Must specify logdir where profile should be written!")
+    jax.profiler.start_trace(logdir)
 
 
 def stop() -> Optional[str]:
-  """Stops profiling."""
-  jax.profiler.stop_trace()
+    """Stops profiling."""
+    jax.profiler.stop_trace()
 
 
 CollectCallback = Callable[[Optional[str]], None]
 
 
-def collect(logdir: str,
-            callback: CollectCallback,
-            hosts: Optional[Sequence[str]] = None,
-            duration_ms: int = 3_000):
-  """Calls start() followed by stop() after specified duration."""
-  del hosts  # not used.
-  start(logdir)
+def collect(
+    logdir: str,
+    callback: CollectCallback,
+    hosts: Optional[Sequence[str]] = None,
+    duration_ms: int = 3_000,
+):
+    """Calls start() followed by stop() after specified duration."""
+    del hosts  # not used.
+    start(logdir)
 
-  def timer_cb():
-    stop()
-    callback(None)
+    def timer_cb():
+        stop()
+        callback(None)
 
-  threading.Timer(duration_ms / 1e3, timer_cb).start()
-
-
+    threading.Timer(duration_ms / 1e3, timer_cb).start()

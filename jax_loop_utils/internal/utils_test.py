@@ -20,84 +20,88 @@ import jax.numpy as jnp
 
 
 class TestError(BaseException):
-  __test__ = False
-  pass
+    __test__ = False
+    pass
 
 
 class HelpersTest(absltest.TestCase):
+    def test_log_activity(
+        self,
+    ):
+        with self.assertLogs() as logs:
+            with utils.log_activity("test_activity"):
+                pass
+        self.assertLen(logs.output, 2)
+        self.assertEqual(logs.output[0], "INFO:absl:test_activity ...")
+        self.assertRegex(
+            logs.output[1], r"^INFO:absl:test_activity finished after \d+.\d\ds.$"
+        )
 
-  def test_log_activity(
-      self,
-  ):
-    with self.assertLogs() as logs:
-      with utils.log_activity("test_activity"):
-        pass
-    self.assertLen(logs.output, 2)
-    self.assertEqual(logs.output[0], "INFO:absl:test_activity ...")
-    self.assertRegex(logs.output[1],
-                     r"^INFO:absl:test_activity finished after \d+.\d\ds.$")
+    def test_log_activity_fails(
+        self,
+    ):
+        with self.assertRaises(TestError):  # pylint: disable=g-error-prone-assert-raises, line-too-long
+            with self.assertLogs() as logs:
+                with utils.log_activity("test_activity"):
+                    raise TestError()
+        self.assertLen(logs.output, 2)
+        self.assertEqual(logs.output[0], "INFO:absl:test_activity ...")
+        self.assertRegex(
+            logs.output[1], r"^ERROR:absl:test_activity FAILED after \d+.\d\ds"
+        )
 
-  def test_log_activity_fails(
-      self,
-  ):
-    with self.assertRaises(TestError):  # pylint: disable=g-error-prone-assert-raises, line-too-long
-      with self.assertLogs() as logs:
-        with utils.log_activity("test_activity"):
-          raise TestError()
-    self.assertLen(logs.output, 2)
-    self.assertEqual(logs.output[0], "INFO:absl:test_activity ...")
-    self.assertRegex(logs.output[1],
-                     r"^ERROR:absl:test_activity FAILED after \d+.\d\ds")
+    def test_logged_with(self):
+        @utils.logged_with("test_activity")
+        def test():
+            pass
 
-  def test_logged_with(self):
+        with self.assertLogs() as logs:
+            test()
+        self.assertLen(logs.output, 2)
+        self.assertEqual(logs.output[0], "INFO:absl:test_activity ...")
+        self.assertRegex(
+            logs.output[1], r"^INFO:absl:test_activity finished after \d+.\d\ds.$"
+        )
 
-    @utils.logged_with("test_activity")
-    def test():
-      pass
+    def test_logged_with_fails(self):
+        @utils.logged_with("test_activity")
+        def test():
+            raise TestError()
 
-    with self.assertLogs() as logs:
-      test()
-    self.assertLen(logs.output, 2)
-    self.assertEqual(logs.output[0], "INFO:absl:test_activity ...")
-    self.assertRegex(logs.output[1],
-                     r"^INFO:absl:test_activity finished after \d+.\d\ds.$")
+        with self.assertRaises(TestError):  # pylint: disable=g-error-prone-assert-raises, line-too-long
+            with self.assertLogs() as logs:
+                test()
+        self.assertLen(logs.output, 2)
+        self.assertEqual(logs.output[0], "INFO:absl:test_activity ...")
+        self.assertRegex(
+            logs.output[1], r"^ERROR:absl:test_activity FAILED after \d+.\d\ds"
+        )
 
-  def test_logged_with_fails(self):
+    def test_check_param(self):
+        a = jnp.array(0.0)
+        with self.assertRaisesRegex(ValueError, r"^Expected np.array or jnp.array"):
+            utils.check_param(None, ndim=1)
+        with self.assertRaisesRegex(ValueError, r"^Expected ndim"):
+            utils.check_param(a, ndim=1)
+        with self.assertRaisesRegex(ValueError, r"^Expected dtype"):
+            utils.check_param(a, ndim=0, dtype=jnp.int32)
+        utils.check_param(a, ndim=0)  # should work
+        utils.check_param(a, ndim=0, dtype=jnp.float32)  # should also work
 
-    @utils.logged_with("test_activity")
-    def test():
-      raise TestError()
-
-    with self.assertRaises(TestError):  # pylint: disable=g-error-prone-assert-raises, line-too-long
-      with self.assertLogs() as logs:
-        test()
-    self.assertLen(logs.output, 2)
-    self.assertEqual(logs.output[0], "INFO:absl:test_activity ...")
-    self.assertRegex(logs.output[1],
-                     r"^ERROR:absl:test_activity FAILED after \d+.\d\ds")
-
-  def test_check_param(self):
-    a = jnp.array(0.)
-    with self.assertRaisesRegex(ValueError, r"^Expected np.array or jnp.array"):
-      utils.check_param(None, ndim=1)
-    with self.assertRaisesRegex(ValueError, r"^Expected ndim"):
-      utils.check_param(a, ndim=1)
-    with self.assertRaisesRegex(ValueError, r"^Expected dtype"):
-      utils.check_param(a, ndim=0, dtype=jnp.int32)
-    utils.check_param(a, ndim=0)  # should work
-    utils.check_param(a, ndim=0, dtype=jnp.float32)  # should also work
-
-  def test_flatten_dict(self):
-    self.assertEqual(
-        utils.flatten_dict(
-            {
-                "x": 1,
-                "y": None,
-                "z": {
-                    "a": "bc",
+    def test_flatten_dict(self):
+        self.assertEqual(
+            utils.flatten_dict(
+                {
+                    "x": 1,
+                    "y": None,
+                    "z": {
+                        "a": "bc",
+                    },
                 }
-            }), [("x", 1), ("y", ""), ("z.a", "bc")])
+            ),
+            [("x", 1), ("y", ""), ("z.a", "bc")],
+        )
 
 
 if __name__ == "__main__":
-  absltest.main()
+    absltest.main()

@@ -43,7 +43,6 @@ Usage:
 # pylint: disable=unused-import
 # pylint: disable=g-importing-member
 
-
 from jax_loop_utils.metric_writers.async_writer import AsyncMultiWriter
 from jax_loop_utils.metric_writers.async_writer import AsyncWriter
 from jax_loop_utils.metric_writers.async_writer import ensure_flushes
@@ -54,4 +53,3 @@ from jax_loop_utils.metric_writers.utils import write_values
 
 # TODO(b/200953513): Migrate away from logging imports (on module level)
 #                    to logging the actual usage. See b/200953513.
-

@@ -33,9 +33,9 @@ _work_unit_lock = threading.Lock()
 
 
 def work_unit() -> WorkUnit:
-  """Gets the global work unit for this experiment trial."""
-  global _work_unit
-  if _work_unit is None:
-    with _work_unit_lock:
-      _work_unit = LocalWorkUnit()
-  return _work_unit
+    """Gets the global work unit for this experiment trial."""
+    global _work_unit
+    if _work_unit is None:
+        with _work_unit_lock:
+            _work_unit = LocalWorkUnit()
+    return _work_unit
