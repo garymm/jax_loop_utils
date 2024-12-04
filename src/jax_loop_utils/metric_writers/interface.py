@@ -156,6 +156,7 @@ class MetricWriter(abc.ABC):
             of the MetricWriter.
         """
 
+    @abc.abstractmethod
     def write_pointcloud(
         self,
         step: int,
@@ -174,7 +175,6 @@ class MetricWriter(abc.ABC):
             colors.
           configs: A dictionary of configuration options for the point cloud.
         """
-        raise NotImplementedError()
 
     @abc.abstractmethod
     def write_hparams(self, hparams: Mapping[str, Any]):
