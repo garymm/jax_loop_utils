@@ -37,12 +37,8 @@ test = ["chex", "pytest", "pytest-cov"]
 torch = ["torch>=2.0"]
 
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
-
-[tool.setuptools]
-packages = ["jax_loop_utils"]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.uv]
 
