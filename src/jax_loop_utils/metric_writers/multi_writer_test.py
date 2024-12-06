@@ -16,10 +16,10 @@
 
 from unittest import mock
 
-from absl.testing import absltest
-from jax_loop_utils.metric_writers import interface
-from jax_loop_utils.metric_writers import multi_writer
 import numpy as np
+from absl.testing import absltest
+
+from jax_loop_utils.metric_writers import interface, multi_writer
 
 
 class MultiWriterTest(absltest.TestCase):
@@ -55,7 +55,7 @@ class MultiWriterTest(absltest.TestCase):
             step=0,
             point_clouds={"pcd": point_clouds},
             point_colors={"pcd": point_colors},
-            configs={"config": config},
+            configs=config,
         )
         self.writer.flush()
         for w in self.writers:
@@ -63,7 +63,7 @@ class MultiWriterTest(absltest.TestCase):
                 step=0,
                 point_clouds={"pcd": point_clouds},
                 point_colors={"pcd": point_colors},
-                configs={"config": config},
+                configs=config,
             )
             w.flush.assert_called()
 

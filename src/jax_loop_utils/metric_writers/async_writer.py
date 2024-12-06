@@ -21,18 +21,20 @@
   thread on the next write_*() call.
 """
 
-from collections.abc import Mapping, Sequence
 import contextlib
+from collections.abc import Mapping, Sequence
 from typing import Any, Optional
 
-from jax_loop_utils import asynclib
-
-from jax_loop_utils.metric_writers import interface
-from jax_loop_utils.metric_writers import multi_writer
 import wrapt
+
+from jax_loop_utils import asynclib
+from jax_loop_utils.metric_writers import interface, multi_writer
 
 Array = interface.Array
 Scalar = interface.Scalar
+
+# TODO: Once https://github.com/GrahamDumpleton/wrapt/issues/134 is fixed, remove
+#       the type ignore on all calls to `_wrap_exceptions`.
 
 
 @wrapt.decorator
@@ -44,7 +46,7 @@ def _wrap_exceptions(wrapped, instance, args, kwargs):
         raise asynclib.AsyncError(
             "Consider re-running the code without AsyncWriter (e.g. creating a "
             "writer using "
-            "`clu.metric_writers.create_default_writer(asynchronous=False)`)"
+            "`jax_loop_utils.metric_writers.create_default_writer(asynchronous=False)`)"
         ) from e
 
 
@@ -73,7 +75,7 @@ class AsyncWriter(interface.MetricWriter):
             thread_name_prefix="AsyncWriter", max_workers=num_workers
         )
 
-    @_wrap_exceptions
+    @_wrap_exceptions  # type: ignore[call-arg]  # type: ignore[call-arg]
     def write_summaries(
         self,
         step: int,
@@ -84,29 +86,29 @@ class AsyncWriter(interface.MetricWriter):
             step=step, values=values, metadata=metadata
         )
 
-    @_wrap_exceptions
+    @_wrap_exceptions  # type: ignore[call-arg]
     def write_scalars(self, step: int, scalars: Mapping[str, Scalar]):
         self._pool(self._writer.write_scalars)(step=step, scalars=scalars)
 
-    @_wrap_exceptions
+    @_wrap_exceptions  # type: ignore[call-arg]
     def write_images(self, step: int, images: Mapping[str, Array]):
         self._pool(self._writer.write_images)(step=step, images=images)
 
-    @_wrap_exceptions
+    @_wrap_exceptions  # type: ignore[call-arg]
     def write_videos(self, step: int, videos: Mapping[str, Array]):
         self._pool(self._writer.write_videos)(step=step, videos=videos)
 
-    @_wrap_exceptions
+    @_wrap_exceptions  # type: ignore[call-arg]
     def write_audios(self, step: int, audios: Mapping[str, Array], *, sample_rate: int):
         self._pool(self._writer.write_audios)(
             step=step, audios=audios, sample_rate=sample_rate
         )
 
-    @_wrap_exceptions
+    @_wrap_exceptions  # type: ignore[call-arg]
     def write_texts(self, step: int, texts: Mapping[str, str]):
         self._pool(self._writer.write_texts)(step=step, texts=texts)
 
-    @_wrap_exceptions
+    @_wrap_exceptions  # type: ignore[call-arg]
     def write_histograms(
         self,
         step: int,
@@ -117,7 +119,7 @@ class AsyncWriter(interface.MetricWriter):
             step=step, arrays=arrays, num_buckets=num_buckets
         )
 
-    @_wrap_exceptions
+    @_wrap_exceptions  # type: ignore[call-arg]
     def write_pointcloud(
         self,
         step: int,
@@ -133,7 +135,7 @@ class AsyncWriter(interface.MetricWriter):
             configs=configs,
         )
 
-    @_wrap_exceptions
+    @_wrap_exceptions  # type: ignore[call-arg]
     def write_hparams(self, hparams: Mapping[str, Any]):
         self._pool(self._writer.write_hparams)(hparams=hparams)
 

@@ -14,9 +14,10 @@
 
 """Tests for the LoggingWriter."""
 
-from absl.testing import absltest
-from jax_loop_utils.metric_writers import logging_writer
 import numpy as np
+from absl.testing import absltest
+
+from jax_loop_utils.metric_writers import logging_writer
 
 
 class LoggingWriterTest(absltest.TestCase):
@@ -92,14 +93,14 @@ class LoggingWriterTest(absltest.TestCase):
                 step=4,
                 point_clouds={"pcd": point_clouds},
                 point_colors={"pcd": point_colors},
-                configs={"configs": config},
+                configs=config,
             )
         self.assertEqual(
             logs.output,
             [
                 "INFO:absl:[4] Got point clouds: {'pcd': (1, 1024, 3)},"
-                " point_colors: {'pcd': (1, 1024, 3)}, configs: {'configs':"
-                " {'material': 'PointCloudMaterial', 'size': 0.09}}."
+                " point_colors: {'pcd': (1, 1024, 3)}, configs: {'material': "
+                "'PointCloudMaterial', 'size': 0.09}."
             ],
         )
 

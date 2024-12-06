@@ -17,11 +17,11 @@
 import time
 from unittest import mock
 
-from absl.testing import absltest
-from jax_loop_utils import asynclib
-from jax_loop_utils.metric_writers import async_writer
-from jax_loop_utils.metric_writers import interface
 import numpy as np
+from absl.testing import absltest
+
+from jax_loop_utils import asynclib
+from jax_loop_utils.metric_writers import async_writer, interface
 
 
 class AsyncWriterTest(absltest.TestCase):
@@ -75,14 +75,14 @@ class AsyncWriterTest(absltest.TestCase):
             step=0,
             point_clouds={"pcd": point_clouds},
             point_colors={"pcd": point_colors},
-            configs={"config": config},
+            configs=config,
         )
         self.writer.flush()
         self.sync_writer.write_pointcloud.assert_called_with(
             step=0,
             point_clouds={"pcd": mock.ANY},
             point_colors={"pcd": mock.ANY},
-            configs={"config": mock.ANY},
+            configs=config,
         )
 
     def test_write_texts(self):

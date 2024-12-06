@@ -17,9 +17,10 @@
 from collections.abc import Mapping
 from typing import Any, Optional
 
-from absl import logging
-from jax_loop_utils.metric_writers import interface
 import numpy as np
+from absl import logging
+
+from jax_loop_utils.metric_writers import interface
 
 Array = interface.Array
 Scalar = interface.Scalar
@@ -93,6 +94,7 @@ class LoggingWriter(interface.MetricWriter):
                 np.asarray(value), num_buckets=num_buckets.get(key)
             )
             if histo is not None:
+                assert bins is not None
                 logging.info(
                     "[%d]%s Histogram for %r = {%s}",
                     step,

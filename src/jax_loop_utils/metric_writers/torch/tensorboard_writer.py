@@ -20,10 +20,11 @@ Use this writer for the Pytorch-based code.
 
 from collections.abc import Mapping
 from typing import Any, Optional
+
 from absl import logging
+from torch.utils.tensorboard.writer import SummaryWriter
 
 from jax_loop_utils.metric_writers import interface
-from torch.utils import tensorboard
 
 Array = interface.Array
 Scalar = interface.Scalar
@@ -34,7 +35,7 @@ class TensorboardWriter(interface.MetricWriter):
 
     def __init__(self, logdir: str):
         super().__init__()
-        self._writer = tensorboard.SummaryWriter(log_dir=logdir)
+        self._writer = SummaryWriter(log_dir=logdir)
 
     def write_summaries(
         self,

@@ -17,11 +17,11 @@
 import collections
 import os
 
-from jax_loop_utils.metric_writers.tf import summary_writer
 import numpy as np
 import tensorflow as tf
-
 from tensorboard.plugins.hparams import plugin_data_pb2
+
+from jax_loop_utils.metric_writers.tf import summary_writer
 
 
 def _load_summaries_data(logdir):
@@ -96,7 +96,7 @@ def _load_hparams(logdir: str):
             for value in event.summary.value:
                 if value.metadata.plugin_data.plugin_name == "hparams":
                     hparams.append(
-                        plugin_data_pb2.HParamsPluginData.FromString(
+                        plugin_data_pb2.HParamsPluginData.FromString(  # type: ignore[attr-defined]
                             value.metadata.plugin_data.content
                         )
                     )
@@ -178,7 +178,7 @@ class SummaryWriterTest(tf.test.TestCase):
             step=0,
             point_clouds={"pcd": point_clouds},
             point_colors={"pcd": point_colors},
-            configs={"config": config},
+            configs=config,
         )
         self.writer.flush()
         data = _load_pointcloud_data(self.logdir)
