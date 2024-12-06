@@ -17,10 +17,13 @@ jobs:
           enable-cache: true
       - name: pytest
         run: uv run --extra test pytest --capture=no --verbose --cov --cov-report=xml --ignore-glob='jax_loop_utils/metric_writers/tf/*' --ignore-glob='jax_loop_utils/metric_writers/torch/*' jax_loop_utils/
+        working-directory: src
       - name: pytest tensorflow
         run: uv run --extra test --extra tensorflow pytest --capture=no --verbose --cov --cov-report=xml --cov-append jax_loop_utils/metric_writers/tf
+        working-directory: src
       - name: pytest torch
         run: uv run --extra test --extra torch pytest --capture=no --verbose --cov --cov-report=xml --cov-append jax_loop_utils/metric_writers/torch
+        working-directory: src
       - name: Upload coverage reports to Codecov
         if: always()
         uses: codecov/codecov-action@v4
@@ -37,7 +40,7 @@ jobs:
         with:
           enable-cache: true
       - name: ruff
-        run: uv run --with ruff ruff check .
+        run: uv run --with ruff ruff check src
 
   # pyright:
   #   runs-on: ubuntu-22.04
