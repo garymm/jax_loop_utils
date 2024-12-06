@@ -40,6 +40,9 @@ torch = ["torch>=2.0"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+exclude = ["*_test.py"]
+
 [tool.uv]
 
 # restrict to platforms we care about so that version resolution is faster and more likely to succeed
