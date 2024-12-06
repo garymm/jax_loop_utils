@@ -42,12 +42,16 @@ jobs:
       - name: ruff
         run: uv run --with ruff ruff check src
 
-  # pyright:
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: astral-sh/setup-uv@v3
-  #       with:
-  #         enable-cache: true
-  #     - name: pyright
-  #       run: uv run --extra pyright pyright
+  pyright:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - name: uv sync
+        run: uv sync --all-extras
+      - name: pyright
+        # TODO: add more dependencies as we fix the violations
+        run: uv run pyright jax_loop_utils/metric_writers/
+        working-directory: src
