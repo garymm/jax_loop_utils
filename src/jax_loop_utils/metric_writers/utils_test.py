@@ -15,17 +15,16 @@
 """Tests for interface."""
 # pylint: disable=g-importing-member
 
-from typing import Any
 from unittest import mock
 
-from absl.testing import absltest
-from absl.testing import parameterized
+import jax.numpy as jnp
+from absl.testing import absltest, parameterized
+
+import jax_loop_utils.metrics
 from jax_loop_utils import values
 from jax_loop_utils.internal import flax
 from jax_loop_utils.metric_writers import utils
 from jax_loop_utils.metric_writers.interface import MetricWriter
-import jax_loop_utils.metrics
-import jax.numpy as jnp
 
 
 @flax.struct.dataclass
@@ -68,15 +67,6 @@ class HyperParamMetric(jax_loop_utils.metrics.Metric):
 
     def compute_value(self):
         return values.HyperParam(self.value)
-
-
-@flax.struct.dataclass
-class SummaryMetric(jax_loop_utils.metrics.Metric):
-    value: jnp.ndarray
-    metadata: Any
-
-    def compute_value(self):
-        return values.Summary(self.value, self.metadata)
 
 
 def _to_summary(metrics):
@@ -142,12 +132,6 @@ class MetricWriterTest(parameterized.TestCase):
         hparam_metrics = {
             "lr": HyperParamMetric(value=0.01),
         }
-        summary_metrics = {
-            "summary": SummaryMetric(
-                value=jnp.asarray([2, 3, 10]), metadata="some info"
-            ),
-            "summary2": SummaryMetric(value=jnp.asarray([2, 3, 10]), metadata=5),
-        }
         metrics = {
             **scalar_metrics,
             **image_metrics,
@@ -155,7 +139,6 @@ class MetricWriterTest(parameterized.TestCase):
             **audio_metrics,
             **text_metrics,
             **hparam_metrics,
-            **summary_metrics,
         }
         metrics = {k: m.compute_value() for k, m in metrics.items()}
         utils.write_values(writer, step, metrics)
@@ -176,11 +159,6 @@ class MetricWriterTest(parameterized.TestCase):
         )
         writer.write_texts.assert_called_once_with(step, _to_summary(text_metrics))
         writer.write_hparams.assert_called_once_with(step, _to_summary(hparam_metrics))
-        writer.write_summaries.assert_called_with(
-            step,
-            ONEOF(_to_list_of_dicts(_to_summary(summary_metrics))),
-            metadata=ONEOF(["some info", 5]),
-        )
 
 
 if __name__ == "__main__":

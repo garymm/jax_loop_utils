@@ -37,18 +37,6 @@ class TensorboardWriter(interface.MetricWriter):
         super().__init__()
         self._writer = SummaryWriter(log_dir=logdir)
 
-    def write_summaries(
-        self,
-        step: int,
-        values: Mapping[str, Array],
-        metadata: Optional[Mapping[str, Any]] = None,
-    ):
-        logging.log_first_n(
-            logging.WARNING,
-            "TorchTensorboardWriter does not support writing raw summaries.",
-            1,
-        )
-
     def write_scalars(self, step: int, scalars: Mapping[str, Scalar]):
         for key, value in scalars.items():
             self._writer.add_scalar(key, value, global_step=step)
@@ -86,20 +74,6 @@ class TensorboardWriter(interface.MetricWriter):
             self._writer.add_histogram(
                 tag, values, global_step=step, bins="auto", max_bins=bins
             )
-
-    def write_pointcloud(
-        self,
-        step: int,
-        point_clouds: Mapping[str, Array],
-        *,
-        point_colors: Mapping[str, Array] | None = None,
-        configs: Mapping[str, str | float | bool | None] | None = None,
-    ):
-        logging.log_first_n(
-            logging.WARNING,
-            "TorchTensorBoardWriter does not support writing point clouds.",
-            1,
-        )
 
     def write_hparams(self, hparams: Mapping[str, Any]):
         self._writer.add_hparams(hparams, {})

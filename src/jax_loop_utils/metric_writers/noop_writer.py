@@ -9,14 +9,6 @@ from jax_loop_utils.metric_writers.interface import Array, MetricWriter, Scalar
 class NoOpWriter(MetricWriter):
     """MetricWriter that performs no operations."""
 
-    def write_summaries(
-        self,
-        step: int,
-        values: Mapping[str, Array],
-        metadata: Optional[Mapping[str, Any]] = None,
-    ):
-        pass
-
     def write_scalars(self, step: int, scalars: Mapping[str, Scalar]):
         pass
 
@@ -37,16 +29,6 @@ class NoOpWriter(MetricWriter):
         step: int,
         arrays: Mapping[str, Array],
         num_buckets: Optional[Mapping[str, int]] = None,
-    ):
-        pass
-
-    def write_pointcloud(
-        self,
-        step: int,
-        point_clouds: Mapping[str, Array],
-        *,
-        point_colors: Mapping[str, Array] | None = None,
-        configs: Mapping[str, str | float | bool | None] | None = None,
     ):
         pass
 

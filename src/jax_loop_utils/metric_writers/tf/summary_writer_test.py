@@ -109,19 +109,6 @@ class SummaryWriterTest(tf.test.TestCase):
         self.logdir = self.get_temp_dir()
         self.writer = summary_writer.SummaryWriter(self.logdir)
 
-    def test_write_summaries(self):
-        self.writer.write_summaries(
-            11,
-            {"a": np.eye(3, dtype=np.uint8), "b": np.eye(2, dtype=np.float32)},
-            {"a": np.ones((2, 3)).tobytes()},
-        )
-        self.writer.flush()
-        data, metadata = _load_summaries_data(self.logdir)
-        self.assertAllClose(
-            data[11], {"a": np.eye(3, dtype=np.uint8), "b": np.eye(2, dtype=np.float32)}
-        )
-        self.assertIn("a", metadata[11])
-
     def test_write_scalar(self):
         self.writer.write_scalars(11, {"a": 0.6, "b": 15})
         self.writer.write_scalars(20, {"a": 0.8, "b": 12})
@@ -166,24 +153,6 @@ class SummaryWriterTest(tf.test.TestCase):
             [(0.0, 0.35, 4), (0.35, 0.7, 1)],
         ]
         self.assertAllClose(data["b"], ([0, 2], expected_histograms_b))
-
-    def test_write_pointcloud(self):
-        point_clouds = np.random.normal(0, 1, (1, 1024, 3)).astype(np.float32)
-        point_colors = np.random.uniform(0, 1, (1, 1024, 3)).astype(np.float32)
-        config = {
-            "material": "PointCloudMaterial",
-            "size": 0.09,
-        }
-        self.writer.write_pointcloud(
-            step=0,
-            point_clouds={"pcd": point_clouds},
-            point_colors={"pcd": point_colors},
-            configs=config,
-        )
-        self.writer.flush()
-        data = _load_pointcloud_data(self.logdir)
-        self.assertAllClose(data[0]["pcd_VERTEX"], point_clouds)
-        self.assertAllClose(data[0]["pcd_COLOR"], point_colors)
 
     def test_hparams(self):
         self.writer.write_hparams(dict(batch_size=512, num_epochs=90))

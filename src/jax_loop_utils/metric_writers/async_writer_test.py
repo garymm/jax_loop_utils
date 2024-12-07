@@ -30,17 +30,6 @@ class AsyncWriterTest(absltest.TestCase):
         self.sync_writer = mock.create_autospec(interface.MetricWriter)
         self.writer = async_writer.AsyncWriter(self.sync_writer)
 
-    def test_write_summaries_async(self):
-        self.writer.write_summaries(
-            11,
-            {"a": np.eye(3, dtype=np.uint8), "b": np.eye(2, dtype=np.float32)},
-            {"a": np.ones((2, 3)).tobytes()},
-        )
-        self.writer.flush()
-        self.sync_writer.write_summaries.assert_called_with(
-            step=11, values={"a": mock.ANY, "b": mock.ANY}, metadata={"a": mock.ANY}
-        )
-
     def test_write_scalars_async(self):
         self.writer.write_scalars(0, {"a": 3, "b": 0.15})
         self.writer.write_scalars(2, {"a": 5, "b": 0.007})
@@ -63,27 +52,6 @@ class AsyncWriterTest(absltest.TestCase):
         self.writer.write_videos(4, {"input_videos": videos})
         self.writer.flush()
         self.sync_writer.write_videos.assert_called_with(4, {"input_videos": mock.ANY})
-
-    def test_write_pointcloud(self):
-        point_clouds = np.random.normal(0, 1, (1, 1024, 3)).astype(np.float32)
-        point_colors = np.random.uniform(0, 1, (1, 1024, 3)).astype(np.float32)
-        config = {
-            "material": "PointCloudMaterial",
-            "size": 0.09,
-        }
-        self.writer.write_pointcloud(
-            step=0,
-            point_clouds={"pcd": point_clouds},
-            point_colors={"pcd": point_colors},
-            configs=config,
-        )
-        self.writer.flush()
-        self.sync_writer.write_pointcloud.assert_called_with(
-            step=0,
-            point_clouds={"pcd": mock.ANY},
-            point_colors={"pcd": mock.ANY},
-            configs=config,
-        )
 
     def test_write_texts(self):
         self.writer.write_texts(4, {"samples": "bla"})

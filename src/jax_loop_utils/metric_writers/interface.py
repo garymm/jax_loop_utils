@@ -34,24 +34,6 @@ class MetricWriter(abc.ABC):
     """MetricWriter inferface."""
 
     @abc.abstractmethod
-    def write_summaries(
-        self,
-        step: int,
-        values: Mapping[str, Array],
-        metadata: Optional[Mapping[str, Any]] = None,
-    ):
-        """Saves an arbitrary tensor summary.
-
-        Useful when working with custom plugins or constructing a summary directly.
-
-        Args:
-          step: Step at which the scalar values occurred.
-          values: Mapping from tensor keys to tensors.
-          metadata: Optional SummaryMetadata, as a proto or serialized bytes.
-                    Note that markdown formatting is rendered by tensorboard.
-        """
-
-    @abc.abstractmethod
     def write_scalars(self, step: int, scalars: Mapping[str, Scalar]):
         """Write scalar values for the step.
 
@@ -154,26 +136,6 @@ class MetricWriter(abc.ABC):
           num_buckets: Number of buckets used to create the histogram of the arrays.
             The default number of buckets depends on the particular implementation
             of the MetricWriter.
-        """
-
-    @abc.abstractmethod
-    def write_pointcloud(
-        self,
-        step: int,
-        point_clouds: Mapping[str, Array],
-        *,
-        point_colors: Mapping[str, Array] | None = None,
-        configs: Mapping[str, str | float | bool | None] | None = None,
-    ):
-        """Writes point cloud summaries.
-
-        Args:
-          step: Step at which the point cloud was generated.
-          point_clouds: Mapping from point clouds key to point cloud of shape [N, 3]
-            array of point coordinates.
-          point_colors: Mapping from point colors key to [N, 3] array of point
-            colors.
-          configs: A dictionary of configuration options for the point cloud.
         """
 
     @abc.abstractmethod

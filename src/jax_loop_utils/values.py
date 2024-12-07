@@ -18,7 +18,7 @@ A Metric should return one of the following types when compute() is called.
 """
 
 import dataclasses
-from typing import Any, Union, Protocol, runtime_checkable
+from typing import Any, Protocol, Union, runtime_checkable
 
 import jax.numpy as jnp
 import numpy as np
@@ -36,12 +36,6 @@ class Value(Protocol):
     """
 
     value: Any
-
-
-@dataclasses.dataclass
-class Summary(Value):
-    value: ArrayType
-    metadata: Any
 
 
 @dataclasses.dataclass

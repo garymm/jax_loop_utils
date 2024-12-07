@@ -81,29 +81,6 @@ class LoggingWriterTest(absltest.TestCase):
             ],
         )
 
-    def test_write_pointcloud(self):
-        point_clouds = np.random.normal(0, 1, (1, 1024, 3)).astype(np.float32)
-        point_colors = np.random.uniform(0, 1, (1, 1024, 3)).astype(np.float32)
-        config = {
-            "material": "PointCloudMaterial",
-            "size": 0.09,
-        }
-        with self.assertLogs(level="INFO") as logs:
-            self.writer.write_pointcloud(
-                step=4,
-                point_clouds={"pcd": point_clouds},
-                point_colors={"pcd": point_colors},
-                configs=config,
-            )
-        self.assertEqual(
-            logs.output,
-            [
-                "INFO:absl:[4] Got point clouds: {'pcd': (1, 1024, 3)},"
-                " point_colors: {'pcd': (1, 1024, 3)}, configs: {'material': "
-                "'PointCloudMaterial', 'size': 0.09}."
-            ],
-        )
-
     def test_write_hparams(self):
         with self.assertLogs(level="INFO") as logs:
             self.writer.write_hparams({"learning_rate": 0.1, "batch_size": 128})

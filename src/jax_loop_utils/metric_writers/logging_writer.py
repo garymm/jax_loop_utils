@@ -35,19 +35,6 @@ class LoggingWriter(interface.MetricWriter):
         else:
             self._collection_str = ""
 
-    def write_summaries(
-        self,
-        step: int,
-        values: Mapping[str, Array],
-        metadata: Optional[Mapping[str, Any]] = None,
-    ):
-        logging.info(
-            "[%d]%s Got raw tensors: %s.",
-            step,
-            self._collection_str,
-            {k: v.shape for k, v in values.items()},
-        )
-
     def write_scalars(self, step: int, scalars: Mapping[str, Scalar]):
         values = [
             f"{k}={v:.6g}" if isinstance(v, float) else f"{k}={v}"
@@ -102,27 +89,6 @@ class LoggingWriter(interface.MetricWriter):
                     key,
                     _get_histogram_as_string(histo, bins),
                 )
-
-    def write_pointcloud(
-        self,
-        step: int,
-        point_clouds: Mapping[str, Array],
-        *,
-        point_colors: Mapping[str, Any] | None = None,
-        configs: Mapping[str, str | float | bool | None] | None = None,
-    ):
-        logging.info(
-            "[%d]%s Got point clouds: %s, point_colors: %s, configs: %s.",
-            step,
-            self._collection_str,
-            {k: v.shape for k, v in point_clouds.items()},
-            (
-                {k: v.shape for k, v in point_colors.items()}
-                if point_colors is not None
-                else None
-            ),
-            configs,
-        )
 
     def write_hparams(self, hparams: Mapping[str, Any]):
         logging.info("[Hyperparameters]%s %s", self._collection_str, hparams)

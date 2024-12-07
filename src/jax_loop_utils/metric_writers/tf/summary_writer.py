@@ -21,17 +21,16 @@ TorchTensorboardWriter instead.
 from collections.abc import Mapping
 from typing import Any, Optional
 
+import tensorflow as tf
 from absl import logging
+from etils import epy
 
 from jax_loop_utils.internal import utils
 from jax_loop_utils.metric_writers import interface
-from etils import epy
-import tensorflow as tf
 
 with epy.lazy_imports():
     # pylint: disable=g-import-not-at-top
     from tensorboard.plugins.hparams import api as hparams_api
-    from tensorboard.plugins.mesh import summary as mesh_summary  # pylint: disable=line-too-long
     # pylint: enable=g-import-not-at-top
 
 
@@ -45,17 +44,6 @@ class SummaryWriter(interface.MetricWriter):
     def __init__(self, logdir: str):
         super().__init__()
         self._summary_writer = tf.summary.create_file_writer(logdir)
-
-    def write_summaries(
-        self,
-        step: int,
-        values: Mapping[str, Array],
-        metadata: Optional[Mapping[str, Any]] = None,
-    ):
-        with self._summary_writer.as_default():
-            for key, value in values.items():
-                md = metadata.get(key) if metadata is not None else None
-                tf.summary.write(key, value, step=step, metadata=md)
 
     def write_scalars(self, step: int, scalars: Mapping[str, Scalar]):
         with self._summary_writer.as_default():
@@ -100,26 +88,6 @@ class SummaryWriter(interface.MetricWriter):
             for key, value in arrays.items():
                 buckets = None if num_buckets is None else num_buckets.get(key)
                 tf.summary.histogram(key, value, step=step, buckets=buckets)
-
-    def write_pointcloud(
-        self,
-        step: int,
-        point_clouds: Mapping[str, Array],
-        *,
-        point_colors: Mapping[str, Array] | None = None,
-        configs: Mapping[str, str | float | bool | None] | None = None,
-    ):
-        with self._summary_writer.as_default():
-            for key, vertices in point_clouds.items():
-                colors = None if point_colors is None else point_colors.get(key)
-                config = None if configs is None else configs.get(key)
-                mesh_summary.mesh(
-                    key,
-                    vertices=vertices,
-                    colors=colors,
-                    step=step,
-                    config_dict=config,
-                )
 
     def write_hparams(self, hparams: Mapping[str, Any]):
         with self._summary_writer.as_default():

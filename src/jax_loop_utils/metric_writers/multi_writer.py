@@ -29,15 +29,6 @@ class MultiWriter(interface.MetricWriter):
     def __init__(self, writers: Sequence[interface.MetricWriter]):
         self._writers = tuple(writers)
 
-    def write_summaries(
-        self,
-        step: int,
-        values: Mapping[str, Array],
-        metadata: Optional[Mapping[str, Any]] = None,
-    ):
-        for w in self._writers:
-            w.write_summaries(step, values, metadata)
-
     def write_scalars(self, step: int, scalars: Mapping[str, Scalar]):
         for w in self._writers:
             w.write_scalars(step, scalars)
@@ -66,19 +57,6 @@ class MultiWriter(interface.MetricWriter):
     ):
         for w in self._writers:
             w.write_histograms(step, arrays, num_buckets)
-
-    def write_pointcloud(
-        self,
-        step: int,
-        point_clouds: Mapping[str, Array],
-        *,
-        point_colors: Mapping[str, Array] | None = None,
-        configs: Mapping[str, str | float | bool | None] | None = None,
-    ):
-        for w in self._writers:
-            w.write_pointcloud(
-                step, point_clouds, point_colors=point_colors, configs=configs
-            )
 
     def write_hparams(self, hparams: Mapping[str, Any]):
         for w in self._writers:

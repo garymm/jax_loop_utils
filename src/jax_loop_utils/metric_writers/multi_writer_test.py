@@ -16,7 +16,6 @@
 
 from unittest import mock
 
-import numpy as np
 from absl.testing import absltest
 
 from jax_loop_utils.metric_writers import interface, multi_writer
@@ -41,29 +40,6 @@ class MultiWriterTest(absltest.TestCase):
                     mock.call(step=0, scalars={"a": 3, "b": 0.15}),
                     mock.call(step=2, scalars={"a": 5, "b": 0.007}),
                 ]
-            )
-            w.flush.assert_called()
-
-    def test_write_pointcloud(self):
-        point_clouds = np.random.normal(0, 1, (1, 1024, 3)).astype(np.float32)
-        point_colors = np.random.uniform(0, 1, (1, 1024, 3)).astype(np.float32)
-        config = {
-            "material": "PointCloudMaterial",
-            "size": 0.09,
-        }
-        self.writer.write_pointcloud(
-            step=0,
-            point_clouds={"pcd": point_clouds},
-            point_colors={"pcd": point_colors},
-            configs=config,
-        )
-        self.writer.flush()
-        for w in self.writers:
-            w.write_pointcloud.assert_called_with(
-                step=0,
-                point_clouds={"pcd": point_clouds},
-                point_colors={"pcd": point_colors},
-                configs=config,
             )
             w.flush.assert_called()
 

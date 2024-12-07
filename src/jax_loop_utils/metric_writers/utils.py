@@ -24,13 +24,12 @@ method of the writer depending on the type of the metric.
 import collections
 from typing import Any, Mapping, Union
 
-from absl import flags
-from jax_loop_utils import values
-from jax_loop_utils.metric_writers.interface import MetricWriter
-
 import jax.numpy as jnp
 import numpy as np
+from absl import flags
 
+from jax_loop_utils import values
+from jax_loop_utils.metric_writers.interface import MetricWriter
 
 FLAGS = flags.FLAGS
 
@@ -62,11 +61,7 @@ def write_values(
     writes = collections.defaultdict(dict)
     histogram_num_buckets = collections.defaultdict(int)
     for k, v in metrics.items():
-        if isinstance(v, values.Summary):
-            writes[
-                (writer.write_summaries, frozenset({"metadata": v.metadata}.items()))
-            ][k] = v.value
-        elif _is_scalar(v):
+        if _is_scalar(v):
             if isinstance(v, values.Scalar):
                 writes[(writer.write_scalars, frozenset())][k] = v.value
             else:

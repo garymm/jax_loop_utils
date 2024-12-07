@@ -75,17 +75,6 @@ class AsyncWriter(interface.MetricWriter):
             thread_name_prefix="AsyncWriter", max_workers=num_workers
         )
 
-    @_wrap_exceptions  # type: ignore[call-arg]  # type: ignore[call-arg]
-    def write_summaries(
-        self,
-        step: int,
-        values: Mapping[str, Array],
-        metadata: Optional[Mapping[str, Any]] = None,
-    ):
-        self._pool(self._writer.write_summaries)(
-            step=step, values=values, metadata=metadata
-        )
-
     @_wrap_exceptions  # type: ignore[call-arg]
     def write_scalars(self, step: int, scalars: Mapping[str, Scalar]):
         self._pool(self._writer.write_scalars)(step=step, scalars=scalars)
@@ -117,22 +106,6 @@ class AsyncWriter(interface.MetricWriter):
     ):
         self._pool(self._writer.write_histograms)(
             step=step, arrays=arrays, num_buckets=num_buckets
-        )
-
-    @_wrap_exceptions  # type: ignore[call-arg]
-    def write_pointcloud(
-        self,
-        step: int,
-        point_clouds: Mapping[str, Array],
-        *,
-        point_colors: Mapping[str, Array] | None = None,
-        configs: Mapping[str, str | float | bool | None] | None = None,
-    ):
-        self._pool(self._writer.write_pointcloud)(
-            step=step,
-            point_clouds=point_clouds,
-            point_colors=point_colors,
-            configs=configs,
         )
 
     @_wrap_exceptions  # type: ignore[call-arg]
