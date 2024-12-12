@@ -29,6 +29,7 @@ keywords = ["JAX", "machine learning"]
 Homepage = "http://github.com/Astera-org/jax_loop_utils"
 
 [project.optional-dependencies]
+mlflow = ["mlflow-skinny>=2.0"]
 pyright = ["pyright"]
 # for synopsis.ipynb
 synopsis = ["chex", "flax", "ipykernel", "matplotlib"]

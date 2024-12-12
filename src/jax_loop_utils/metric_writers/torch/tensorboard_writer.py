@@ -48,7 +48,7 @@ class TensorboardWriter(interface.MetricWriter):
     def write_videos(self, step: int, videos: Mapping[str, Array]):
         logging.log_first_n(
             logging.WARNING,
-            "TorchTensorBoardWriter does not support writing videos.",
+            "torch.TensorboardWriter does not support writing videos.",
             1,
         )
 
@@ -60,7 +60,7 @@ class TensorboardWriter(interface.MetricWriter):
 
     def write_texts(self, step: int, texts: Mapping[str, str]):
         raise NotImplementedError(
-            "TorchTensorBoardWriter does not support writing texts."
+            "torch.TensorboardWriter does not support writing texts."
         )
 
     def write_histograms(
