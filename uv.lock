@@ -734,7 +734,7 @@ requires-dist = [
     { name = "etils", extras = ["epath", "epy"] },
     { name = "flax", marker = "extra == 'synopsis'" },
     { name = "ipykernel", marker = "extra == 'synopsis'" },
-    { name = "jax" },
+    { name = "jax", specifier = ">=0.4.36" },
     { name = "matplotlib", marker = "extra == 'synopsis'" },
     { name = "mlflow-skinny", marker = "extra == 'mlflow'", specifier = ">=2.0" },
     { name = "numpy" },

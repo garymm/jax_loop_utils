@@ -9,7 +9,7 @@ authors = [{ name = "Astera Institute", email = "no-reply@astera.org" }]
 dependencies = [
     "absl-py",
     "etils[epath,epy]",
-    "jax",
+    "jax>=0.4.36",
     "numpy",
     "packaging",
     "Pillow",
