@@ -20,17 +20,22 @@ from jax_loop_utils.metric_writers.interface import (
 
 
 class MlflowMetricWriter(MetricWriterInterface):
-    """MLflow implementation of MetricWriter."""
+    """Writes metrics to MLflow Tracking."""
 
-    def __init__(self, experiment_name: str, tracking_uri: str | None = None):
+    def __init__(
+        self,
+        experiment_name: str,
+        run_name: str | None = None,
+        tracking_uri: str | None = None,
+    ):
         """Initialize MLflow writer.
 
         Args:
             experiment_name: Name of the MLflow experiment.
-            tracking_uri: Address of local or remote tracking server. If not provided, defaults
-                to the service set by ``mlflow.tracking.set_tracking_uri``. See
-                `Where Runs Get Recorded <../tracking.html#where-runs-get-recorded>`_
-                for more info.
+            run_name: Name of the MLflow run.
+            tracking_uri: Address of local or remote tracking server.
+              Treated the same as arguments to mlflow.set_tracking_uri.
+              See https://www.mlflow.org/docs/latest/python_api/mlflow.html#mlflow.set_tracking_uri
         """
         self._client = mlflow.MlflowClient(tracking_uri=tracking_uri)
         experiment = self._client.get_experiment_by_name(experiment_name)
@@ -42,7 +47,9 @@ class MlflowMetricWriter(MetricWriterInterface):
                 experiment_name,
             )
             experiment_id = self._client.create_experiment(experiment_name)
-        self._run_id = self._client.create_run(experiment_id=experiment_id).info.run_id
+        self._run_id = self._client.create_run(
+            experiment_id=experiment_id, run_name=run_name
+        ).info.run_id
 
     def write_scalars(self, step: int, scalars: Mapping[str, Scalar]):
         """Write scalar metrics to MLflow."""
