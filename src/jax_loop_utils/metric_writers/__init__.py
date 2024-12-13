@@ -46,6 +46,7 @@ from jax_loop_utils.metric_writers.async_writer import (
     ensure_flushes,
 )
 from jax_loop_utils.metric_writers.interface import MetricWriter
+from jax_loop_utils.metric_writers.keep_last_writer import KeepLastWriter
 from jax_loop_utils.metric_writers.logging_writer import LoggingWriter
 from jax_loop_utils.metric_writers.multi_writer import MultiWriter
 from jax_loop_utils.metric_writers.utils import write_values
@@ -57,6 +58,7 @@ __all__ = [
     "AsyncMultiWriter",
     "AsyncWriter",
     "ensure_flushes",
+    "KeepLastWriter",
     "LoggingWriter",
     "MetricWriter",
     "MultiWriter",
