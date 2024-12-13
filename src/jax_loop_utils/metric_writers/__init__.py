@@ -48,7 +48,9 @@ from jax_loop_utils.metric_writers.async_writer import (
 from jax_loop_utils.metric_writers.interface import MetricWriter
 from jax_loop_utils.metric_writers.keep_last_writer import KeepLastWriter
 from jax_loop_utils.metric_writers.logging_writer import LoggingWriter
+from jax_loop_utils.metric_writers.memory_writer import MemoryWriter
 from jax_loop_utils.metric_writers.multi_writer import MultiWriter
+from jax_loop_utils.metric_writers.prefix_suffix_writer import PrefixSuffixWriter
 from jax_loop_utils.metric_writers.utils import write_values
 
 # TODO(b/200953513): Migrate away from logging imports (on module level)
@@ -60,7 +62,9 @@ __all__ = [
     "ensure_flushes",
     "KeepLastWriter",
     "LoggingWriter",
+    "MemoryWriter",
     "MetricWriter",
     "MultiWriter",
+    "PrefixSuffixWriter",
     "write_values",
 ]
