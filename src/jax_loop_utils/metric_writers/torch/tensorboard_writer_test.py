@@ -18,9 +18,10 @@ import collections
 import os
 from typing import Any, Dict
 
-from jax_loop_utils.metric_writers.torch import tensorboard_writer
 import numpy as np
 import tensorflow as tf
+
+from jax_loop_utils.metric_writers.torch import tensorboard_writer
 
 
 def _load_scalars_data(logdir: str):
@@ -30,7 +31,9 @@ def _load_scalars_data(logdir: str):
     for path in paths:
         for event in tf.compat.v1.train.summary_iterator(path):
             for value in event.summary.value:
-                data[event.step][value.tag] = value.simple_value
+                assert value.HasField("tensor")
+                assert len(value.tensor.float_val) == 1
+                data[event.step][value.tag] = value.tensor.float_val[0]
 
     return data
 

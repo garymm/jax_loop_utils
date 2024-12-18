@@ -39,7 +39,7 @@ class TensorboardWriter(interface.MetricWriter):
 
     def write_scalars(self, step: int, scalars: Mapping[str, Scalar]):
         for key, value in scalars.items():
-            self._writer.add_scalar(key, value, global_step=step)
+            self._writer.add_scalar(key, value, global_step=step, new_style=True)
 
     def write_images(self, step: int, images: Mapping[str, Array]):
         for key, value in images.items():
