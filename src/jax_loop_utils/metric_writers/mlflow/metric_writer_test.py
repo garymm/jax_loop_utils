@@ -4,6 +4,7 @@ import time
 import mlflow
 import mlflow.entities
 import numpy as np
+import jax.numpy as jnp
 from absl.testing import absltest
 
 from jax_loop_utils.metric_writers.mlflow import MlflowMetricWriter
@@ -58,7 +59,7 @@ class MlflowMetricWriterTest(absltest.TestCase):
             tracking_uri = f"file://{temp_dir}"
             experiment_name = "experiment_name"
             writer = MlflowMetricWriter(experiment_name, tracking_uri=tracking_uri)
-            writer.write_images(0, {"test_image": np.zeros((3, 3, 3), dtype=np.uint8)})
+            writer.write_images(0, {"test_image": jnp.zeros((3, 3, 3), dtype=np.uint8)})
             writer.close()
 
             runs = _get_runs(tracking_uri, experiment_name)

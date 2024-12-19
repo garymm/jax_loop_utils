@@ -8,6 +8,7 @@ import mlflow
 import mlflow.config
 import mlflow.entities
 import mlflow.tracking.fluent
+import numpy as np
 from absl import logging
 
 from jax_loop_utils.metric_writers.interface import (
@@ -64,7 +65,11 @@ class MlflowMetricWriter(MetricWriterInterface):
         """Write images to MLflow."""
         for key, image_array in images.items():
             self._client.log_image(
-                self._run_id, image_array, key=key, step=step, synchronous=False
+                self._run_id,
+                np.array(image_array),
+                key=key,
+                step=step,
+                synchronous=False,
             )
 
     def write_videos(self, step: int, videos: Mapping[str, Array]):
