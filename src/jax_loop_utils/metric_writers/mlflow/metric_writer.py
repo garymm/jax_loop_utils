@@ -122,9 +122,13 @@ class MlflowMetricWriter(MetricWriterInterface):
 
     def flush(self):
         """Flushes all logged data."""
-        mlflow.flush_artifact_async_logging()
-        mlflow.flush_async_logging()
-        mlflow.flush_trace_async_logging()
+        # using private APIs because the public APIs require global state
+        # for the current tracking URI and Run ID, and we don't want to
+        # create a global state.
+        artifact_repo = mlflow.tracking._get_artifact_repo(self._run_id)
+        if artifact_repo:
+            artifact_repo.flush_async_logging()
+        self._client._tracking_client.store.flush_async_logging()
 
     def close(self):
         """End the MLflow run."""
