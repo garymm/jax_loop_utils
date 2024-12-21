@@ -2,6 +2,7 @@
 
 import os
 import pathlib
+import shutil
 import tempfile
 import time
 from collections.abc import Mapping
@@ -123,27 +124,36 @@ class MlflowMetricWriter(MetricWriter):
 
         encode_and_log = maybe_async(self._encode_and_log_video)
 
-        temp_dir = pathlib.Path(tempfile.mkdtemp())
         paths_arrays = [
             (
-                temp_dir / f"{key}_{step:09d}.{_audio_video.CONTAINER_FORMAT}",
+                f"{key}_{step:09d}.{_audio_video.CONTAINER_FORMAT}",
                 video_array,
             )
             for key, video_array in videos.items()
         ]
 
+        temp_dir = pathlib.Path(tempfile.mkdtemp())
         for path, video_array in paths_arrays:
-            encode_and_log(path, video_array)
+            encode_and_log(temp_dir, path, video_array)
 
         pool.close()
+        shutil.rmtree(temp_dir)
 
-    def _encode_and_log_video(self, path: pathlib.Path, video_array: Array):
-        with open(path, "wb") as f:
+    def _encode_and_log_video(
+        self, temp_dir: pathlib.Path, rel_path: str, video_array: Array
+    ):
+        temp_path = temp_dir / rel_path
+        # handle keys with slashes
+        if not temp_path.parent.exists():
+            temp_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(temp_path, "wb") as f:
             _audio_video.encode_video(video_array, f)  # pyright: ignore[reportOptionalMemberAccess]
         # If log_artifact(synchronous=False) existed,
         # we could synchronize with self.flush() rather than at the end of write_videos.
         # https://github.com/mlflow/mlflow/issues/14153
-        self._client.log_artifact(self._run_id, path, os.path.join("videos", path.name))
+        self._client.log_artifact(
+            self._run_id, temp_path, os.path.join("videos", rel_path)
+        )
 
     def write_audios(self, step: int, audios: Mapping[str, Array], *, sample_rate: int):
         """MLflow doesn't support audio logging directly."""

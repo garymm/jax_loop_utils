@@ -83,8 +83,6 @@ class MlflowMetricWriterTest(absltest.TestCase):
             run = runs[0]
             # the string "images" is hardcoded in MlflowClient.log_image.
             artifacts = writer._client.list_artifacts(run.info.run_id, "images")
-            if not artifacts:
-                artifacts = writer._client.list_artifacts(run.info.run_id, "images")
             artifact_paths = [artifact.path for artifact in artifacts]
             self.assertGreaterEqual(len(artifact_paths), 1)
             self.assertIn("test_image", artifact_paths[0])
@@ -141,7 +139,7 @@ class MlflowMetricWriterTest(absltest.TestCase):
                 frames.append(frame)
 
             videos = {
-                "noise_0": np.stack(frames, axis=0),
+                "zzz/noise_0": np.stack(frames, axis=0),
                 "noise_1": np.stack(frames, axis=0),
             }
             writer.write_videos(0, videos)
@@ -152,18 +150,16 @@ class MlflowMetricWriterTest(absltest.TestCase):
             self.assertEqual(len(runs), 1)
             run = runs[0]
 
-            artifacts = writer._client.list_artifacts(run.info.run_id, "videos")
-            if not artifacts:
-                artifacts = writer._client.list_artifacts(run.info.run_id, "videos")
+            artifacts_videos = writer._client.list_artifacts(run.info.run_id, "videos")
+            self.assertEqual(len(artifacts_videos), 2)
+            sorted_artifacts_videos = sorted(artifacts_videos, key=lambda x: x.path)
+            self.assertEqual(
+                sorted_artifacts_videos[0].path, "videos/noise_1_000000000.mp4"
+            )
 
-            artifact_paths = [artifact.path for artifact in artifacts]
-            self.assertEqual(len(artifact_paths), 2)
-            self.assertTrue(
-                any(path.startswith("videos/noise_0") for path in artifact_paths)
-            )
-            self.assertTrue(
-                any(path.startswith("videos/noise_1") for path in artifact_paths)
-            )
+            artifacts_zzz = writer._client.list_artifacts(run.info.run_id, "videos/zzz")
+            self.assertEqual(len(artifacts_zzz), 1)
+            self.assertEqual(artifacts_zzz[0].path, "videos/zzz/noise_0_000000000.mp4")
 
     def test_no_ops(self):
         with tempfile.TemporaryDirectory() as temp_dir:
