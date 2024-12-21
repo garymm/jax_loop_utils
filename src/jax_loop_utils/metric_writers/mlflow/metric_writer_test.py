@@ -1,10 +1,12 @@
 import tempfile
 import time
 
+import jax.numpy as jnp
 import mlflow
 import mlflow.entities
+import mlflow.exceptions
+import mlflow.protos.databricks_pb2
 import numpy as np
-import jax.numpy as jnp
 from absl.testing import absltest
 
 from jax_loop_utils.metric_writers.mlflow import MlflowMetricWriter
@@ -15,6 +17,21 @@ def _get_runs(tracking_uri: str, experiment_name: str) -> list[mlflow.entities.R
     experiment = client.get_experiment_by_name(experiment_name)
     assert experiment is not None
     return client.search_runs([experiment.experiment_id])
+
+
+def _exceptional_mlflow_client_class(
+    actually_create: bool,
+) -> type[mlflow.MlflowClient]:
+    class ExceptionalMlflowClient(mlflow.MlflowClient):
+        def create_experiment(self, *args, **kwargs):
+            if actually_create:
+                return super().create_experiment(*args, **kwargs)
+            raise mlflow.exceptions.MlflowException(
+                "Experiment already exists",
+                error_code=mlflow.protos.databricks_pb2.RESOURCE_ALREADY_EXISTS,
+            )
+
+    return ExceptionalMlflowClient
 
 
 class MlflowMetricWriterTest(absltest.TestCase):
@@ -134,6 +151,34 @@ class MlflowMetricWriterTest(absltest.TestCase):
             self.assertEqual(len(artifacts), 0)
             self.assertEqual(run.data.metrics, {})
             self.assertEqual(run.data.params, {})
+
+    def test_experiment_creation_race_condition(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tracking_uri = f"file://{temp_dir}"
+            experiment_name = "race_condition_experiment"
+
+            writer = MlflowMetricWriter(
+                experiment_name,
+                tracking_uri=tracking_uri,
+                _client_class=_exceptional_mlflow_client_class(True),
+            )
+
+            runs = _get_runs(tracking_uri, experiment_name)
+            self.assertEqual(len(runs), 1)
+            writer.close()
+
+    def test_experiment_creation_race_condition_and_then_fail(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tracking_uri = f"file://{temp_dir}"
+            experiment_name = "race_condition_experiment"
+
+            self.assertRaises(
+                RuntimeError,
+                MlflowMetricWriter,
+                experiment_name,
+                tracking_uri=tracking_uri,
+                _client_class=_exceptional_mlflow_client_class(False),
+            )
 
 
 if __name__ == "__main__":

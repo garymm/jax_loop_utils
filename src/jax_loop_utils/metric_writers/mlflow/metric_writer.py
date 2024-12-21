@@ -7,6 +7,8 @@ from typing import Any
 import mlflow
 import mlflow.config
 import mlflow.entities
+import mlflow.exceptions
+import mlflow.protos.databricks_pb2
 import mlflow.tracking.fluent
 import numpy as np
 from absl import logging
@@ -28,6 +30,7 @@ class MlflowMetricWriter(MetricWriterInterface):
         experiment_name: str,
         run_name: str | None = None,
         tracking_uri: str | None = None,
+        _client_class: type[mlflow.MlflowClient] = mlflow.MlflowClient,
     ):
         """Initialize MLflow writer.
 
@@ -37,17 +40,32 @@ class MlflowMetricWriter(MetricWriterInterface):
             tracking_uri: Address of local or remote tracking server.
               Treated the same as arguments to mlflow.set_tracking_uri.
               See https://www.mlflow.org/docs/latest/python_api/mlflow.html#mlflow.set_tracking_uri
+            _client_class: MLflow client class (for testing only).
         """
-        self._client = mlflow.MlflowClient(tracking_uri=tracking_uri)
+        self._client = _client_class(tracking_uri=tracking_uri)
         experiment = self._client.get_experiment_by_name(experiment_name)
         if experiment:
             experiment_id = experiment.experiment_id
         else:
             logging.info(
-                "Experiment with name '%s' does not exist. Creating a new experiment.",
+                "Experiment '%s' does not exist. Creating a new experiment.",
                 experiment_name,
             )
-            experiment_id = self._client.create_experiment(experiment_name)
+            try:
+                experiment_id = self._client.create_experiment(experiment_name)
+            except mlflow.exceptions.MlflowException as e:
+                # Handle race in creating experiment.
+                if e.error_code != mlflow.protos.databricks_pb2.ErrorCode.Name(
+                    mlflow.protos.databricks_pb2.RESOURCE_ALREADY_EXISTS
+                ):
+                    raise
+                experiment = self._client.get_experiment_by_name(experiment_name)
+                if not experiment:
+                    raise RuntimeError(
+                        "Failed to get, then failed to create, then failed to get "
+                        f"again experiment '{experiment_name}'"
+                    )
+                experiment_id = experiment.experiment_id
         self._run_id = self._client.create_run(
             experiment_id=experiment_id, run_name=run_name
         ).info.run_id
