@@ -25,7 +25,7 @@ def _exceptional_mlflow_client_class(
     class ExceptionalMlflowClient(mlflow.MlflowClient):
         def create_experiment(self, *args, **kwargs):
             if actually_create:
-                return super().create_experiment(*args, **kwargs)
+                super().create_experiment(*args, **kwargs)
             raise mlflow.exceptions.MlflowException(
                 "Experiment already exists",
                 error_code=mlflow.protos.databricks_pb2.RESOURCE_ALREADY_EXISTS,
