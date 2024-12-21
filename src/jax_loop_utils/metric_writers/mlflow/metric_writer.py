@@ -148,12 +148,11 @@ class MlflowMetricWriter(MetricWriter):
             temp_path.parent.mkdir(parents=True, exist_ok=True)
         with open(temp_path, "wb") as f:
             _audio_video.encode_video(video_array, f)  # pyright: ignore[reportOptionalMemberAccess]
+        dest_dir = os.path.join("videos", os.path.dirname(rel_path)).rstrip("/")
         # If log_artifact(synchronous=False) existed,
         # we could synchronize with self.flush() rather than at the end of write_videos.
         # https://github.com/mlflow/mlflow/issues/14153
-        self._client.log_artifact(
-            self._run_id, temp_path, os.path.join("videos", rel_path)
-        )
+        self._client.log_artifact(self._run_id, temp_path, dest_dir)
 
     def write_audios(self, step: int, audios: Mapping[str, Array], *, sample_rate: int):
         """MLflow doesn't support audio logging directly."""

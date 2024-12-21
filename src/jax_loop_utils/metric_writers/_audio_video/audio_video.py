@@ -25,21 +25,44 @@ def encode_video(video_array: Array, destination: io.IOBase):
     Args:
         video_array: array to encode. Must have shape (T, H, W, 1) or (T, H, W, 3),
             where T is the number of frames, H is the height, W is the width, and the last
-            dimension is the number of channels. Must have dtype uint8.
+            dimension is the number of channels.
+            Must be ints in [0, 255] or floats in [0, 1].
         destination: Destination to write the encoded video.
     """
     video_array = np.array(video_array)
-    if (
-        video_array.dtype != np.uint8
-        or video_array.ndim != 4
-        or video_array.shape[-1] not in (1, 3)
-    ):
+    if video_array.ndim != 4 or video_array.shape[-1] not in (1, 3):
         raise ValueError(
-            "Expected a uint8 array with shape (T, H, W, 1) or (T, H, W, 3)."
+            "Expected an array with shape (T, H, W, 1) or (T, H, W, 3)."
             f"Got shape {video_array.shape} with dtype {video_array.dtype}."
         )
 
+    if (
+        np.issubdtype(video_array.dtype, np.floating)
+        and np.all(0 <= video_array)
+        and np.all(video_array <= 1.0)
+    ):
+        video_array = (video_array * 255).astype(np.uint8)
+    elif (
+        np.issubdtype(video_array.dtype, np.integer)
+        and np.all(0 <= video_array)
+        and np.all(video_array <= 255)
+    ):
+        video_array = video_array.astype(np.uint8)
+    else:
+        raise ValueError(
+            f"Expected video_array to be floats in [0, 1] or ints in [0, 255], got {video_array.dtype}"
+        )
+
     T, H, W, C = video_array.shape
+    # Pad height and width to even numbers if necessary
+    pad_h = H % 2
+    pad_w = W % 2
+    if pad_h or pad_w:
+        padding = [(0, 0), (0, pad_h), (0, pad_w), (0, 0)]
+        video_array = np.pad(video_array, padding, mode="constant")
+        H += pad_h
+        W += pad_w
+
     is_grayscale = C == 1
     if is_grayscale:
         video_array = np.squeeze(video_array, axis=-1)

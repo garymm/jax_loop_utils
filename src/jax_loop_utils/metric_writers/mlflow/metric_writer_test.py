@@ -156,10 +156,12 @@ class MlflowMetricWriterTest(absltest.TestCase):
             self.assertEqual(
                 sorted_artifacts_videos[0].path, "videos/noise_1_000000000.mp4"
             )
+            self.assertFalse(sorted_artifacts_videos[0].is_dir)
 
             artifacts_zzz = writer._client.list_artifacts(run.info.run_id, "videos/zzz")
             self.assertEqual(len(artifacts_zzz), 1)
             self.assertEqual(artifacts_zzz[0].path, "videos/zzz/noise_0_000000000.mp4")
+            self.assertFalse(artifacts_zzz[0].is_dir)
 
     def test_no_ops(self):
         with tempfile.TemporaryDirectory() as temp_dir:
