@@ -1,5 +1,4 @@
 import tempfile
-import time
 
 import jax.numpy as jnp
 import mlflow
@@ -85,9 +84,6 @@ class MlflowMetricWriterTest(absltest.TestCase):
             # the string "images" is hardcoded in MlflowClient.log_image.
             artifacts = writer._client.list_artifacts(run.info.run_id, "images")
             if not artifacts:
-                # have seen some latency in artifacts becoming available
-                # Maybe file system sync? Not sure.
-                time.sleep(0.1)
                 artifacts = writer._client.list_artifacts(run.info.run_id, "images")
             artifact_paths = [artifact.path for artifact in artifacts]
             self.assertGreaterEqual(len(artifact_paths), 1)
@@ -132,12 +128,48 @@ class MlflowMetricWriterTest(absltest.TestCase):
             self.assertEqual(run.data.params["batch_size"], "32")
             self.assertEqual(run.data.params["epochs"], "100")
 
+    def test_write_videos(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tracking_uri = f"file://{temp_dir}"
+            experiment_name = "experiment_name"
+            writer = MlflowMetricWriter(experiment_name, tracking_uri=tracking_uri)
+
+            # Generate 100 frames of noise video
+            frames = []
+            for _ in range(100):
+                frame = np.random.randint(0, 256, (64, 64, 3), dtype=np.uint8)
+                frames.append(frame)
+
+            videos = {
+                "noise_0": np.stack(frames, axis=0),
+                "noise_1": np.stack(frames, axis=0),
+            }
+            writer.write_videos(0, videos)
+            writer.close()
+
+            # Verify artifacts were written
+            runs = _get_runs(tracking_uri, experiment_name)
+            self.assertEqual(len(runs), 1)
+            run = runs[0]
+
+            artifacts = writer._client.list_artifacts(run.info.run_id, "videos")
+            if not artifacts:
+                artifacts = writer._client.list_artifacts(run.info.run_id, "videos")
+
+            artifact_paths = [artifact.path for artifact in artifacts]
+            self.assertEqual(len(artifact_paths), 2)
+            self.assertTrue(
+                any(path.startswith("videos/noise_0") for path in artifact_paths)
+            )
+            self.assertTrue(
+                any(path.startswith("videos/noise_1") for path in artifact_paths)
+            )
+
     def test_no_ops(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             tracking_uri = f"file://{temp_dir}"
             experiment_name = "experiment_name"
             writer = MlflowMetricWriter(experiment_name, tracking_uri=tracking_uri)
-            writer.write_videos(0, {"video": np.zeros((4, 28, 28, 3))})
             writer.write_audios(0, {"audio": np.zeros((2, 1000))}, sample_rate=16000)
             writer.write_histograms(
                 0, {"histogram": np.zeros((10,))}, num_buckets={"histogram": 10}

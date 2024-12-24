@@ -1,7 +1,10 @@
 """MLflow implementation of MetricWriter interface."""
 
+import os
+import pathlib
+import tempfile
+import time
 from collections.abc import Mapping
-from time import time
 from typing import Any
 
 import mlflow
@@ -13,16 +16,24 @@ import mlflow.tracking.fluent
 import numpy as np
 from absl import logging
 
+from jax_loop_utils import asynclib
 from jax_loop_utils.metric_writers.interface import (
     Array,
+    MetricWriter,
     Scalar,
 )
-from jax_loop_utils.metric_writers.interface import (
-    MetricWriter as MetricWriterInterface,
-)
+
+try:
+    from jax_loop_utils.metric_writers import _audio_video
+except ImportError:
+    _audio_video = None
 
 
-class MlflowMetricWriter(MetricWriterInterface):
+def _noop_decorator(func):
+    return func
+
+
+class MlflowMetricWriter(MetricWriter):
     """Writes metrics to MLflow Tracking."""
 
     def __init__(
@@ -72,7 +83,7 @@ class MlflowMetricWriter(MetricWriterInterface):
 
     def write_scalars(self, step: int, scalars: Mapping[str, Scalar]):
         """Write scalar metrics to MLflow."""
-        timestamp = int(time() * 1000)
+        timestamp = int(time.time() * 1000)
         metrics_list = [
             mlflow.entities.Metric(k, float(v), timestamp, step)
             for k, v in scalars.items()
@@ -91,18 +102,52 @@ class MlflowMetricWriter(MetricWriterInterface):
             )
 
     def write_videos(self, step: int, videos: Mapping[str, Array]):
-        """MLflow doesn't support video logging directly."""
-        # this could be supported if we convert the video to a file
-        # and log the file as an artifact.
-        logging.log_first_n(
-            logging.WARNING,
-            "mlflow.MetricWriter does not support writing videos.",
-            1,
-        )
+        """Convert videos to images and write them to MLflow.
+
+        Requires pillow to be installed.
+        """
+        if _audio_video is None:
+            logging.log_first_n(
+                logging.WARNING,
+                "MlflowMetricWriter.write_videos requires the [video] extra to be installed.",
+                1,
+            )
+            return
+
+        pool = asynclib.Pool()
+
+        if len(videos) > 1:
+            maybe_async = pool
+        else:
+            maybe_async = _noop_decorator
+
+        encode_and_log = maybe_async(self._encode_and_log_video)
+
+        temp_dir = pathlib.Path(tempfile.mkdtemp())
+        paths_arrays = [
+            (
+                temp_dir / f"{key}_{step:09d}.{_audio_video.CONTAINER_FORMAT}",
+                video_array,
+            )
+            for key, video_array in videos.items()
+        ]
+
+        for path, video_array in paths_arrays:
+            encode_and_log(path, video_array)
+
+        pool.close()
+
+    def _encode_and_log_video(self, path: pathlib.Path, video_array: Array):
+        with open(path, "wb") as f:
+            _audio_video.encode_video(video_array, f)  # pyright: ignore[reportOptionalMemberAccess]
+        # If log_artifact(synchronous=False) existed,
+        # we could synchronize with self.flush() rather than at the end of write_videos.
+        # https://github.com/mlflow/mlflow/issues/14153
+        self._client.log_artifact(self._run_id, path, os.path.join("videos", path.name))
 
     def write_audios(self, step: int, audios: Mapping[str, Array], *, sample_rate: int):
         """MLflow doesn't support audio logging directly."""
-        # this could be supported if we convert the video to a file
+        # this could be supported if we convert the audio to a file
         # and log the file as an artifact.
         logging.log_first_n(
             logging.WARNING,

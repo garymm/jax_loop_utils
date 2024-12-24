@@ -33,7 +33,7 @@ class Pool:
 
     Synopsis:
 
-      from clu.internal import asynclib
+      from jax_loop_utils import asynclib
 
       pool = asynclib.Pool()
       @pool
@@ -54,7 +54,7 @@ class Pool:
           thread_name_prefix: See documentation of `ThreadPoolExecutor`.
           max_workers: See documentation of `ThreadPoolExecutor`. The default `None`
             optimizes for parallelizability using the number of CPU cores. If you
-            specify `max_workers=1` you the async calls are executed in the same
+            specify `max_workers=1` the async calls are executed in the same
             order they have been scheduled.
         """
         self._pool = concurrent.futures.ThreadPoolExecutor(
