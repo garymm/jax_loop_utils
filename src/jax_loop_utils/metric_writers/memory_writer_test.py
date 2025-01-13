@@ -22,9 +22,7 @@ def test_write_scalars():
 def test_write_scalars_fails_when_using_same_step():
     writer = MemoryWriter()
     writer.write_scalars(0, {})
-    with pytest.raises(
-        ValueError, match=r"Step must be greater than the last inserted step\."
-    ):
+    with pytest.raises(ValueError, match=r"Step must be greater than the last inserted step\."):
         writer.write_scalars(0, {})
 
 
@@ -90,9 +88,7 @@ def test_write_histograms():
         dict(writer.histograms),
         {
             5: MemoryWriterHistogramEntry(arrays={"a": _histogram()}, num_buckets=None),
-            6: MemoryWriterHistogramEntry(
-                arrays={"b": _histogram()}, num_buckets={"b": 10}
-            ),
+            6: MemoryWriterHistogramEntry(arrays={"b": _histogram()}, num_buckets={"b": 10}),
         },
         strict=True,
     )

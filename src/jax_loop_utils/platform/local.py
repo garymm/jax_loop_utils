@@ -17,6 +17,7 @@
 from typing import Any
 
 from absl import logging
+
 from jax_loop_utils.platform import interface
 
 WorkUnit = interface.WorkUnit
@@ -44,9 +45,7 @@ class LocalWorkUnit(WorkUnit):
         """Sets the status string for this task."""
         logging.info("Setting task status: %s", msg)
 
-    def create_artifact(
-        self, artifact_type: ArtifactType, artifact: Any, description: str
-    ):
+    def create_artifact(self, artifact_type: ArtifactType, artifact: Any, description: str):
         """Creates an artifact entry for the work unit."""
         logging.info(
             "Created artifact %s of type %s and value %s.",

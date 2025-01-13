@@ -14,15 +14,14 @@
 
 """Helper function for creating and logging JAX variable overviews."""
 
-from collections.abc import Callable, Mapping, Sequence
 import dataclasses
+from collections.abc import Callable, Mapping, Sequence
 from typing import Any
-
-from absl import logging
 
 import jax
 import jax.numpy as jnp
 import numpy as np
+from absl import logging
 
 _ParamsContainer = dict[str, np.ndarray] | Mapping[str, Mapping[str, Any]]
 
@@ -70,9 +69,7 @@ def flatten_dict(
     for key, value in input_dict.items():
         nested_key = f"{prefix}{delimiter}{key}" if prefix else key
         if isinstance(value, Mapping):
-            output_dict.update(
-                flatten_dict(value, prefix=nested_key, delimiter=delimiter)
-            )
+            output_dict.update(flatten_dict(value, prefix=nested_key, delimiter=delimiter))
         else:
             output_dict[nested_key] = value
     return output_dict
@@ -126,9 +123,7 @@ def _make_row_with_stats(name, value, mean, std) -> _ParamRowWithStats:
     )
 
 
-def _make_row_with_stats_and_sharding(
-    name, value, mean, std
-) -> _ParamRowWithStatsAndSharding:
+def _make_row_with_stats_and_sharding(name, value, mean, std) -> _ParamRowWithStatsAndSharding:
     row = _make_row_with_sharding(name, value)
     return _ParamRowWithStatsAndSharding(
         **dataclasses.asdict(row),
@@ -164,7 +159,7 @@ def _get_parameter_rows(
 
     if params:
         params = flatten_dict(params)
-        names, values = map(list, tuple(zip(*sorted(params.items()))))
+        names, values = map(list, tuple(zip(*sorted(params.items()), strict=False)))
     else:
         names, values = [], []
 
@@ -174,9 +169,7 @@ def _get_parameter_rows(
 
         case True:
             mean_and_std = _mean_std(values)
-            return jax.tree_util.tree_map(
-                _make_row_with_stats, names, values, *mean_and_std
-            )
+            return jax.tree_util.tree_map(_make_row_with_stats, names, values, *mean_and_std)
 
         case "global":
             mean_and_std = _mean_std_jit(values)
@@ -196,9 +189,9 @@ def _default_table_value_formatter(value):
     if isinstance(value, bool):
         return str(value)
     elif isinstance(value, int):
-        return "{:,}".format(value)
+        return f"{value:,}"
     elif isinstance(value, float):
-        return "{:.3}".format(value)
+        return f"{value:.3}"
     else:
         return str(value)
 
@@ -247,8 +240,7 @@ def make_table(
         column_names = [field.name for field in dataclasses.fields(rows[0])]
 
     columns = [
-        Column(name, [value_formatter(getattr(row, name)) for row in rows])
-        for name in column_names
+        Column(name, [value_formatter(getattr(row, name)) for row in rows]) for name in column_names
     ]
 
     var_line_format = "|" + "".join(f" {{: <{c.width}s}} |" for c in columns)
@@ -324,9 +316,7 @@ def get_parameter_overview(
     Total: 65,172,512
     """
 
-    return _get_parameter_overview(
-        params, include_stats=include_stats, max_lines=max_lines
-    )
+    return _get_parameter_overview(params, include_stats=include_stats, max_lines=max_lines)
 
 
 def _log_parameter_overview(
@@ -339,9 +329,7 @@ def _log_parameter_overview(
 ):
     """See log_parameter_overview()."""
 
-    table = _get_parameter_overview(
-        params, include_stats=include_stats, max_lines=max_lines
-    )
+    table = _get_parameter_overview(params, include_stats=include_stats, max_lines=max_lines)
     if jax_logging_process is None or jax_logging_process == jax.process_index():
         lines = [msg] if msg else []
         lines += table.split("\n")

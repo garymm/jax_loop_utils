@@ -23,9 +23,7 @@ class VideoTest(absltest.TestCase):
             encode_video(invalid_shape, io.BytesIO())
 
         invalid_dtype = 2 * np.ones((10, 20, 30, 3), dtype=np.float32)
-        with self.assertRaisesRegex(
-            ValueError, r"Expected video_array to be floats in \[0, 1\]"
-        ):
+        with self.assertRaisesRegex(ValueError, r"Expected video_array to be floats in \[0, 1\]"):
             encode_video(invalid_dtype, io.BytesIO())
 
     def test_encode_video_success(self):

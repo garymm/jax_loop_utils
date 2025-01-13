@@ -22,7 +22,8 @@ method of the writer depending on the type of the metric.
 # pylint: disable=g-importing-member
 
 import collections
-from typing import Any, Mapping, Union
+from collections.abc import Mapping
+from typing import Any, Union
 
 import jax.numpy as jnp
 import numpy as np
@@ -35,9 +36,9 @@ FLAGS = flags.FLAGS
 
 
 def _is_scalar(value: Any) -> bool:
-    if isinstance(value, values.Scalar) or isinstance(value, (int, float, np.number)):
+    if isinstance(value, values.Scalar | int | float | np.number):
         return True
-    if isinstance(value, (np.ndarray, jnp.ndarray)):
+    if isinstance(value, np.ndarray | jnp.ndarray):
         return value.ndim == 0 or value.size <= 1
     return False
 

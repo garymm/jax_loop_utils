@@ -63,17 +63,13 @@ class AsyncWriter(interface.MetricWriter):
     processes.
     """
 
-    def __init__(
-        self, writer: interface.MetricWriter, *, num_workers: Optional[int] = 1
-    ):
+    def __init__(self, writer: interface.MetricWriter, *, num_workers: Optional[int] = 1):
         super().__init__()
         self._writer = writer
         # By default, we have a thread pool with a single worker to ensure that
         # calls to the function are run in order (but in a background thread).
         self._num_workers = num_workers
-        self._pool = asynclib.Pool(
-            thread_name_prefix="AsyncWriter", max_workers=num_workers
-        )
+        self._pool = asynclib.Pool(thread_name_prefix="AsyncWriter", max_workers=num_workers)
 
     @_wrap_exceptions  # type: ignore[call-arg]
     def write_scalars(self, step: int, scalars: Mapping[str, Scalar]):
@@ -89,9 +85,7 @@ class AsyncWriter(interface.MetricWriter):
 
     @_wrap_exceptions  # type: ignore[call-arg]
     def write_audios(self, step: int, audios: Mapping[str, Array], *, sample_rate: int):
-        self._pool(self._writer.write_audios)(
-            step=step, audios=audios, sample_rate=sample_rate
-        )
+        self._pool(self._writer.write_audios)(step=step, audios=audios, sample_rate=sample_rate)
 
     @_wrap_exceptions  # type: ignore[call-arg]
     def write_texts(self, step: int, texts: Mapping[str, str]):
@@ -104,9 +98,7 @@ class AsyncWriter(interface.MetricWriter):
         arrays: Mapping[str, Array],
         num_buckets: Optional[Mapping[str, int]] = None,
     ):
-        self._pool(self._writer.write_histograms)(
-            step=step, arrays=arrays, num_buckets=num_buckets
-        )
+        self._pool(self._writer.write_histograms)(step=step, arrays=arrays, num_buckets=num_buckets)
 
     @_wrap_exceptions  # type: ignore[call-arg]
     def write_hparams(self, hparams: Mapping[str, Any]):

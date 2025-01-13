@@ -29,13 +29,22 @@ Homepage = "http://github.com/Astera-org/jax_loop_utils"
 
 [project.optional-dependencies]
 mlflow = ["mlflow-skinny>=2.0", "Pillow"]
-pyright = ["pyright"]
 # for synopsis.ipynb
 synopsis = ["chex", "flax", "ipykernel", "matplotlib"]
 tensorflow = ["tensorflow>=2.12"]
-test = ["chex", "pytest", "pytest-cov"]
 torch = ["torch>=2.0"]
 audio-video = ["av>=14.0"]
+
+[dependency-groups]
+dev = [
+    "chex>=0.1.87",
+    "pyright==1.1.391",
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.9.1",
+]
+# Development dependencies for --extra torch
+dev-torch = ["tensorflow>=2.12"]
 
 [build-system]
 requires = ["hatchling"]
@@ -62,3 +71,28 @@ filterwarnings = [
     # action:message:category:module:line
     "error",
 ]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "A",   # flake8-builtins
+    "B",   # flake8-bugbear
+    "E",   # pycodestyle
+    "F",   # Pyflakes
+    "I",   # isort
+    "PT",  # flake8-pytest-style
+    "SIM", # flake8-simplify
+    "UP",  # pyupgrade
+]
+ignore = [
+    "A003",   # builtin-attribute-shadowing
+    "SIM108", # Use the ternary operator
+    "UP007",  # Allow Optional[type] instead of X | Y
+    "PT",     # TODO: Remove
+    "A005",   # builtin-module-shadowing
+]
+
+[tool.pyright]
+typeCheckingMode = "standard"

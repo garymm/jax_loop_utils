@@ -136,9 +136,7 @@ def _compute_histogram_as_tf(
         histo = np.asarray([array.size], dtype=np.int64)
         bins = np.asarray([range_max - 0.5, range_max + 0.5], dtype=np.float64)
     else:
-        histo, bins = np.histogram(
-            array, bins=num_buckets, range=(range_min, range_max)
-        )
+        histo, bins = np.histogram(array, bins=num_buckets, range=(range_min, range_max))
         bins = np.asarray(bins, dtype=np.float64)
 
     return histo, bins
@@ -146,10 +144,7 @@ def _compute_histogram_as_tf(
 
 def _get_histogram_as_string(histo: np.ndarray, bins: np.ndarray):
     # First items are right-open (i.e. [a, b)).
-    items = [
-        f"[{bins[i]:.3g}, {bins[i+1]:.3g}): {count}"
-        for i, count in enumerate(histo[:-1])
-    ]
+    items = [f"[{bins[i]:.3g}, {bins[i + 1]:.3g}): {count}" for i, count in enumerate(histo[:-1])]
     # Last item is right-closed (i.e. [a, b]).
     items.append(f"[{bins[-2]:.3g}, {bins[-1]:.3g}]: {histo[-1]}")
     return ", ".join(items)

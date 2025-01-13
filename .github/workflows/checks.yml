@@ -16,20 +16,34 @@ jobs:
         with:
           enable-cache: true
       - name: pytest
-        run: uv run --extra test pytest --capture=no --verbose --cov --cov-report=xml --ignore-glob='jax_loop_utils/metric_writers/tf/*' --ignore-glob='jax_loop_utils/metric_writers/torch/*' --ignore-glob='jax_loop_utils/metric_writers/mlflow/*' --ignore-glob='jax_loop_utils/metric_writers/_audio_video/*' jax_loop_utils/
-        working-directory: src
+        run: |
+          uv sync
+          uv run -- pytest --capture=no --verbose --cov --cov-report=xml \
+             --ignore=src/jax_loop_utils/metric_writers/tf/ \
+             --ignore=src/jax_loop_utils/metric_writers/torch/ \
+             --ignore=src/jax_loop_utils/metric_writers/mlflow/ \
+             --ignore=src/jax_loop_utils/metric_writers/_audio_video/ \
+             src/jax_loop_utils/
       - name: pytest tensorflow
-        run: uv run --extra test --extra tensorflow pytest --capture=no --verbose --cov --cov-report=xml --cov-append jax_loop_utils/metric_writers/tf
-        working-directory: src
+        run: |
+          uv sync --extra tensorflow
+          uv run -- pytest --capture=no --verbose --cov --cov-report=xml --cov-append \
+            src/jax_loop_utils/metric_writers/tf
       - name: pytest torch
-        run: uv run --extra test --extra torch pytest --capture=no --verbose --cov --cov-report=xml --cov-append jax_loop_utils/metric_writers/torch
-        working-directory: src
+        run: |
+          uv sync --group dev-torch --extra torch
+          uv run -- pytest --capture=no --verbose --cov --cov-report=xml --cov-append \
+            src/jax_loop_utils/metric_writers/torch
       - name: pytest mlflow
-        run: uv run --extra test --extra mlflow --extra audio-video pytest --capture=no --verbose --cov --cov-report=xml --cov-append jax_loop_utils/metric_writers/mlflow
-        working-directory: src
+        run: |
+          uv sync --extra mlflow --extra audio-video
+          uv run -- pytest --capture=no --verbose --cov --cov-report=xml --cov-append \
+            src/jax_loop_utils/metric_writers/mlflow
       - name: pytest audio-video
-        run: uv run --extra test --extra audio-video pytest --capture=no --verbose --cov --cov-report=xml --cov-append jax_loop_utils/metric_writers/_audio_video
-        working-directory: src
+        run: |
+          uv sync --extra audio-video
+          uv run -- pytest --capture=no --verbose --cov --cov-report=xml --cov-append \
+            src/jax_loop_utils/metric_writers/_audio_video
       - name: Upload coverage reports to Codecov
         if: always()
         uses: codecov/codecov-action@v4
@@ -45,8 +59,10 @@ jobs:
       - uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
-      - name: ruff
-        run: uv run --with ruff ruff check src
+      - name: ruff format
+        run: uv run -- ruff format --check
+      - name: ruff check
+        run: uv run -- ruff check
 
   pyright:
     runs-on: ubuntu-24.04
@@ -58,6 +74,5 @@ jobs:
       - name: uv sync
         run: uv sync --all-extras
       - name: pyright
-        # TODO: add more dependencies as we fix the violations
-        run: uv run pyright jax_loop_utils/metric_writers/
-        working-directory: src
+        # TODO: check more directories as we fix the violations
+        run: uv run -- pyright src/jax_loop_utils/metric_writers/

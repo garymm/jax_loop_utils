@@ -25,9 +25,7 @@ class PrefixSuffixWriterTest(absltest.TestCase):
     def test_write_images(self):
         image = np.zeros((2, 2, 3))
         self.writer.write_images(0, {"image": image})
-        self.assertEqual(
-            list(self.memory_writer.images[0].keys()), ["prefix/image/suffix"]
-        )
+        self.assertEqual(list(self.memory_writer.images[0].keys()), ["prefix/image/suffix"])
 
     def test_write_texts(self):
         self.writer.write_texts(0, {"text": "hello"})
@@ -54,16 +52,12 @@ class PrefixSuffixWriterTest(absltest.TestCase):
     def test_write_videos(self):
         video = np.zeros((10, 32, 32, 3))  # Simple video array with 10 frames
         self.writer.write_videos(0, {"video": video})
-        self.assertEqual(
-            list(self.memory_writer.videos[0].keys()), ["prefix/video/suffix"]
-        )
+        self.assertEqual(list(self.memory_writer.videos[0].keys()), ["prefix/video/suffix"])
 
     def test_write_audios(self):
         audio = np.zeros((16000,))  # 1 second of audio at 16kHz
         self.writer.write_audios(0, {"audio": audio}, sample_rate=16000)
-        self.assertEqual(
-            list(self.memory_writer.audios[0].audios.keys()), ["prefix/audio/suffix"]
-        )
+        self.assertEqual(list(self.memory_writer.audios[0].audios.keys()), ["prefix/audio/suffix"])
 
     def test_close(self):
         with mock.patch.object(self.memory_writer, "close") as mock_close:

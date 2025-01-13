@@ -19,7 +19,8 @@ import concurrent.futures
 import functools
 import sys
 import threading
-from typing import Callable, List, Optional
+from collections.abc import Callable
+from typing import Optional
 
 from absl import logging
 
@@ -104,7 +105,7 @@ class Pool:
         """Returns True if there are any pending errors."""
         return bool(self._errors)
 
-    def clear_errors(self) -> List[Exception]:
+    def clear_errors(self) -> list[Exception]:
         """Clears all pending errors and returns them as a (possibly empty) list."""
         with self._errors_mutex:
             errors, self._errors = self._errors, collections.deque()
@@ -135,9 +136,7 @@ class Pool:
                 except Exception as e:
                     with self._errors_mutex:
                         self._errors.append(sys.exc_info())
-                    logging.exception(
-                        "Error in producer thread for %s", self._thread_name_prefix
-                    )
+                    logging.exception("Error in producer thread for %s", self._thread_name_prefix)
                     raise e
                 finally:
                     self._queue_length -= 1

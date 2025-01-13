@@ -54,14 +54,10 @@ class TensorboardWriter(interface.MetricWriter):
 
     def write_audios(self, step: int, audios: Mapping[str, Array], *, sample_rate: int):
         for key, value in audios.items():
-            self._writer.add_audio(
-                key, value, global_step=step, sample_rate=sample_rate
-            )
+            self._writer.add_audio(key, value, global_step=step, sample_rate=sample_rate)
 
     def write_texts(self, step: int, texts: Mapping[str, str]):
-        raise NotImplementedError(
-            "torch.TensorboardWriter does not support writing texts."
-        )
+        raise NotImplementedError("torch.TensorboardWriter does not support writing texts.")
 
     def write_histograms(
         self,
@@ -71,9 +67,7 @@ class TensorboardWriter(interface.MetricWriter):
     ):
         for tag, values in arrays.items():
             bins = None if num_buckets is None else num_buckets.get(tag)
-            self._writer.add_histogram(
-                tag, values, global_step=step, bins="auto", max_bins=bins
-            )
+            self._writer.add_histogram(tag, values, global_step=step, bins="auto", max_bins=bins)
 
     def write_hparams(self, hparams: Mapping[str, Any]):
         self._writer.add_hparams(hparams, {})

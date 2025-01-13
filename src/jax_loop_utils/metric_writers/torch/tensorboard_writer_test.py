@@ -16,7 +16,7 @@
 
 import collections
 import os
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
 import tensorflow as tf
@@ -38,7 +38,7 @@ def _load_scalars_data(logdir: str):
     return data
 
 
-def _load_histograms_data(logdir: str) -> Dict[int, Dict[str, Any]]:
+def _load_histograms_data(logdir: str) -> dict[int, dict[str, Any]]:
     """Loads histograms summaries from events in a logdir.
 
     Args:

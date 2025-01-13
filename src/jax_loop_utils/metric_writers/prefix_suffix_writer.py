@@ -1,6 +1,7 @@
 """Writer that adds prefix and suffix to metric keys."""
 
-from typing import Any, Mapping, Optional
+from collections.abc import Mapping
+from typing import Any, Optional
 
 from jax_loop_utils.metric_writers import interface
 
@@ -27,9 +28,7 @@ class PrefixSuffixWriter(interface.MetricWriter):
 
     def _transform_keys(self, data: Mapping[str, Any]) -> dict[str, Any]:
         """Add prefix and suffix to all keys in the mapping."""
-        return {
-            f"{self._prefix}{key}{self._suffix}": value for key, value in data.items()
-        }
+        return {f"{self._prefix}{key}{self._suffix}": value for key, value in data.items()}
 
     def write_scalars(self, step: int, scalars: Mapping[str, interface.Scalar]):
         self._writer.write_scalars(step, self._transform_keys(scalars))
@@ -40,12 +39,8 @@ class PrefixSuffixWriter(interface.MetricWriter):
     def write_videos(self, step: int, videos: Mapping[str, interface.Array]):
         self._writer.write_videos(step, self._transform_keys(videos))
 
-    def write_audios(
-        self, step: int, audios: Mapping[str, interface.Array], *, sample_rate: int
-    ):
-        self._writer.write_audios(
-            step, self._transform_keys(audios), sample_rate=sample_rate
-        )
+    def write_audios(self, step: int, audios: Mapping[str, interface.Array], *, sample_rate: int):
+        self._writer.write_audios(step, self._transform_keys(audios), sample_rate=sample_rate)
 
     def write_texts(self, step: int, texts: Mapping[str, str]):
         self._writer.write_texts(step, self._transform_keys(texts))

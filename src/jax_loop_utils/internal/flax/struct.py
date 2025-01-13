@@ -14,10 +14,10 @@
 
 """Utilities for defining custom classes that can be used with jax transformations."""
 
-from collections.abc import Callable
 import dataclasses
 import functools
-from typing import dataclass_transform, TypeVar, overload
+from collections.abc import Callable
+from typing import TypeVar, dataclass_transform, overload
 
 import jax
 
@@ -25,9 +25,7 @@ _T = TypeVar("_T")
 
 
 def field(pytree_node=True, *, metadata=None, **kwargs):
-    return dataclasses.field(
-        metadata=(metadata or {}) | {"pytree_node": pytree_node}, **kwargs
-    )
+    return dataclasses.field(metadata=(metadata or {}) | {"pytree_node": pytree_node}, **kwargs)
 
 
 @dataclass_transform(field_specifiers=(field,))  # type: ignore[literal-required]
@@ -123,7 +121,7 @@ def dataclass(
     if "_flax_dataclass" in clz.__dict__:
         return clz
 
-    if "frozen" not in kwargs.keys():
+    if "frozen" not in kwargs:
         kwargs["frozen"] = True
     data_clz = dataclasses.dataclass(**kwargs)(clz)  # type: ignore
     meta_fields = []

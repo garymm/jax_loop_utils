@@ -77,7 +77,7 @@ def _to_list_of_dicts(d):
     return [{k: v} for k, v in d.items()]
 
 
-class ONEOF(object):
+class ONEOF:
     """ONEOF(options_list) check value in options_list."""
 
     def __init__(self, container):
@@ -104,27 +104,19 @@ class MetricWriterTest(parameterized.TestCase):
         num_buckets = 4
         sample_rate = 10
         scalar_metrics = {
-            "loss": jax_loop_utils.metrics.Average.from_model_output(
-                jnp.asarray([1, 2, 3])
-            ),
-            "accuracy": jax_loop_utils.metrics.LastValue.from_model_output(
-                jnp.asarray([5])
-            ),
+            "loss": jax_loop_utils.metrics.Average.from_model_output(jnp.asarray([1, 2, 3])),
+            "accuracy": jax_loop_utils.metrics.LastValue.from_model_output(jnp.asarray([5])),
         }
         image_metrics = {
             "image": ImageMetric(jnp.asarray([[4, 5], [1, 2]])),
         }
         histogram_metrics = {
             "hist": HistogramMetric(value=jnp.asarray([7, 8]), num_buckets=num_buckets),
-            "hist2": HistogramMetric(
-                value=jnp.asarray([9, 10]), num_buckets=num_buckets
-            ),
+            "hist2": HistogramMetric(value=jnp.asarray([9, 10]), num_buckets=num_buckets),
         }
         audio_metrics = {
             "audio": AudioMetric(value=jnp.asarray([1, 5]), sample_rate=sample_rate),
-            "audio2": AudioMetric(
-                value=jnp.asarray([1, 5]), sample_rate=sample_rate + 2
-            ),
+            "audio2": AudioMetric(value=jnp.asarray([1, 5]), sample_rate=sample_rate + 2),
         }
         text_metrics = {
             "text": TextMetric(value="hello"),

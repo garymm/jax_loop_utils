@@ -68,9 +68,7 @@ class LoggingWriterTest(absltest.TestCase):
             )
         # Note: There are 31 distinct values [0, 1, ..., 30], and 30 buckets by
         # default. Last bucket gets 2 values.
-        expected_histo_b = ", ".join(
-            [f"[{i}, {i + 1}): 1" for i in range(29)] + ["[29, 30]: 2"]
-        )
+        expected_histo_b = ", ".join([f"[{i}, {i + 1}): 1" for i in range(29)] + ["[29, 30]: 2"])
         self.assertEqual(
             logs.output,
             [
@@ -112,7 +110,7 @@ class LoggingWriterTest(absltest.TestCase):
                 "INFO:absl:[0] collection=train a=3, b=0.15",
                 "INFO:absl:[4] collection=train Got images: {'input_images': (2, 28, 28, 3)}.",
                 "INFO:absl:[4] collection=train Got texts: {'samples': 'bla'}.",
-                "INFO:absl:[4] collection=train Histogram for 'a' = {[-0.1, 0.1): 1, [0.1, 0.3]: 2}",
+                "INFO:absl:[4] collection=train Histogram for 'a' = {[-0.1, 0.1): 1, [0.1, 0.3]: 2}",  # noqa: E501
                 "INFO:absl:[Hyperparameters] collection=train {'learning_rate': 0.1}",
             ],
         )

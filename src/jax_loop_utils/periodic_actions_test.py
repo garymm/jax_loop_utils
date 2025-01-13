@@ -18,16 +18,15 @@ import tempfile
 import time
 from unittest import mock
 
-from absl.testing import absltest
-from absl.testing import parameterized
+from absl.testing import absltest, parameterized
+
 from jax_loop_utils import periodic_actions
+from jax_loop_utils.asynclib import AsyncError
 
 
 class ReportProgressTest(parameterized.TestCase):
     def test_every_steps(self):
-        hook = periodic_actions.ReportProgress(
-            every_steps=4, every_secs=None, num_train_steps=10
-        )
+        hook = periodic_actions.ReportProgress(every_steps=4, every_secs=None, num_train_steps=10)
         t = time.monotonic()
         with self.assertLogs(level="INFO") as logs:
             self.assertFalse(hook(1, t))
@@ -44,9 +43,7 @@ class ReportProgressTest(parameterized.TestCase):
         )
 
     def test_every_secs(self):
-        hook = periodic_actions.ReportProgress(
-            every_steps=None, every_secs=0.3, num_train_steps=10
-        )
+        hook = periodic_actions.ReportProgress(every_steps=None, every_secs=0.3, num_train_steps=10)
         t = time.monotonic()
         with self.assertLogs(level="INFO") as logs:
             self.assertFalse(hook(1, t))
@@ -69,9 +66,7 @@ class ReportProgressTest(parameterized.TestCase):
             self.assertFalse(report(1, t))
             self.assertTrue(report(2, t + 0.12))
         # We did 1 step in 0.12s => 8.333 steps/s.
-        self.assertEqual(
-            logs.output, ["INFO:absl:Setting work unit notes: 8.3 steps/s"]
-        )
+        self.assertEqual(logs.output, ["INFO:absl:Setting work unit notes: 8.3 steps/s"])
 
     def test_unknown_cardinality(self):
         report = periodic_actions.ReportProgress(every_steps=2)
@@ -80,16 +75,12 @@ class ReportProgressTest(parameterized.TestCase):
             self.assertFalse(report(1, t))
             self.assertTrue(report(2, t + 0.12))
         # We did 1 step in 0.12s => 8.333 steps/s.
-        self.assertEqual(
-            logs.output, ["INFO:absl:Setting work unit notes: 8.3 steps/s"]
-        )
+        self.assertEqual(logs.output, ["INFO:absl:Setting work unit notes: 8.3 steps/s"])
 
     def test_called_every_step(self):
         hook = periodic_actions.ReportProgress(every_steps=3, num_train_steps=10)
         t = time.monotonic()
-        with self.assertRaisesRegex(
-            ValueError, "PeriodicAction must be called after every step"
-        ):
+        with self.assertRaisesRegex(ValueError, "PeriodicAction must be called after every step"):
             hook(1, t)
             hook(11, t)  # Raises exception.
 
@@ -100,9 +91,7 @@ class ReportProgressTest(parameterized.TestCase):
     @mock.patch("time.monotonic")
     def test_named(self, wait_jax_async_dispatch, mock_time):
         mock_time.return_value = 0
-        hook = periodic_actions.ReportProgress(
-            every_steps=1, every_secs=None, num_train_steps=10
-        )
+        hook = periodic_actions.ReportProgress(every_steps=1, every_secs=None, num_train_steps=10)
 
         def _wait():
             # Here we depend on hook._executor=ThreadPoolExecutor(max_workers=1)
@@ -127,8 +116,8 @@ class ReportProgressTest(parameterized.TestCase):
         self.assertEqual(
             logs.output,
             [
-                "INFO:absl:Setting work unit notes: 0.2 steps/s, 20.0% (2/10), ETA: 0m"
-                " (0m : 50.0% test1, 25.0% test2)"
+                "INFO:absl:Setting work unit notes: 0.2 steps/s, 20.0% (2/10), "
+                "ETA: 0m (0m : 50.0% test1, 25.0% test2)"
             ],
         )
 
@@ -136,9 +125,7 @@ class ReportProgressTest(parameterized.TestCase):
     def test_write_metrics(self, time_mock):
         time_mock.return_value = 0
         writer_mock = mock.Mock()
-        hook = periodic_actions.ReportProgress(
-            every_steps=2, every_secs=None, writer=writer_mock
-        )
+        hook = periodic_actions.ReportProgress(every_steps=2, every_secs=None, writer=writer_mock)
         time_mock.return_value = 1
         hook(1)
         time_mock.return_value = 2
@@ -269,9 +256,7 @@ class PeriodicCallbackTest(absltest.TestCase):
             del t
             out.append(step)
 
-        hook = periodic_actions.PeriodicCallback(
-            every_steps=1, callback_fn=cb, execute_async=True
-        )
+        hook = periodic_actions.PeriodicCallback(every_steps=1, callback_fn=cb, execute_async=True)
         hook(0)
         hook(1)
         hook(2)
@@ -285,15 +270,13 @@ class PeriodicCallbackTest(absltest.TestCase):
         def cb(step, t):
             del step
             del t
-            raise Exception
+            raise ValueError("oh no")
 
-        hook = periodic_actions.PeriodicCallback(
-            every_steps=1, callback_fn=cb, execute_async=True
-        )
+        hook = periodic_actions.PeriodicCallback(every_steps=1, callback_fn=cb, execute_async=True)
 
         hook(0)
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(AsyncError):
             hook(1)
 
     def test_function_without_step_and_time(self):

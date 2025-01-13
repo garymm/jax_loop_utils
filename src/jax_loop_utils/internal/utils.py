@@ -17,13 +17,13 @@
 import contextlib
 import sys
 import time
-from typing import Any, List, Mapping, Tuple, Union
-
-from absl import logging
+from collections.abc import Mapping
+from typing import Any, Union
 
 import jax.numpy as jnp
 import numpy as np
 import wrapt
+from absl import logging
 
 
 @contextlib.contextmanager
@@ -37,9 +37,7 @@ def log_activity(activity_name: str):
         dt = time.time() - t0
         exc, *_ = sys.exc_info()
         if exc is not None:
-            logging.exception(
-                "%s FAILED after %.2fs with %s.", activity_name, dt, exc.__name__
-            )
+            logging.exception("%s FAILED after %.2fs with %s.", activity_name, dt, exc.__name__)
         else:
             logging.info("%s finished after %.2fs.", activity_name, dt)
 
@@ -68,7 +66,7 @@ def check_param(value, *, ndim=None, dtype=jnp.float32):
       A `ValueError` if `value` does not match `ndim` or `dtype`, or if `value`
       is not an instance of `jnp.ndarray`.
     """
-    if not isinstance(value, (np.ndarray, jnp.ndarray)):
+    if not isinstance(value, np.ndarray | jnp.ndarray):
         raise ValueError(f"Expected np.array or jnp.array, got type={type(value)}")
     if ndim is not None and value.ndim != ndim:
         raise ValueError(f"Expected ndim={ndim}, got ndim={value.ndim}")
@@ -77,8 +75,8 @@ def check_param(value, *, ndim=None, dtype=jnp.float32):
 
 
 def flatten_dict(
-    d: Mapping[str, Any], prefix: Tuple[str, ...] = ()
-) -> List[Tuple[str, Union[int, float, str]]]:
+    d: Mapping[str, Any], prefix: tuple[str, ...] = ()
+) -> list[tuple[str, Union[int, float, str]]]:
     """Returns a sequence of flattened (k, v) pairs for tfsummary.hparams().
 
     Args:
@@ -94,10 +92,8 @@ def flatten_dict(
         # Note `ml_collections.ConfigDict` is not (yet) a `Mapping`.
         if isinstance(v, Mapping) or hasattr(v, "items"):
             ret += flatten_dict(v, prefix + (k,))
-        elif isinstance(v, (list, tuple)):
-            ret += flatten_dict(
-                {str(idx): value for idx, value in enumerate(v)}, prefix + (k,)
-            )
+        elif isinstance(v, list | tuple):
+            ret += flatten_dict({str(idx): value for idx, value in enumerate(v)}, prefix + (k,))
         else:
             ret.append((".".join(prefix + (k,)), v if v is not None else ""))
     return ret

@@ -53,10 +53,7 @@ def _load_histograms_data(logdir):
                     current_steps + [event.step],
                     current_tensors + [tf.make_ndarray(value.tensor)],
                 )
-    return {
-        tag: (np.stack(steps), np.stack(tensors))
-        for tag, (steps, tensors) in data.items()
-    }
+    return {tag: (np.stack(steps), np.stack(tensors)) for tag, (steps, tensors) in data.items()}
 
 
 def _load_scalars_data(logdir: str):

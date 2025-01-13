@@ -74,9 +74,9 @@ class MlflowMetricWriter(MetricWriter):
                 experiment = self._client.get_experiment_by_name(experiment_name)
                 if not experiment:
                     raise RuntimeError(
-                        "Failed to get, then failed to create, then failed to get "
-                        f"again experiment '{experiment_name}'"
-                    )
+                        "Failed to get, then failed to create, "
+                        f"then failed to get again experiment '{experiment_name}'"
+                    ) from None
                 experiment_id = experiment.experiment_id
         self._run_id = self._client.create_run(
             experiment_id=experiment_id, run_name=run_name
@@ -86,8 +86,7 @@ class MlflowMetricWriter(MetricWriter):
         """Write scalar metrics to MLflow."""
         timestamp = int(time.time() * 1000)
         metrics_list = [
-            mlflow.entities.Metric(k, float(v), timestamp, step)
-            for k, v in scalars.items()
+            mlflow.entities.Metric(k, float(v), timestamp, step) for k, v in scalars.items()
         ]
         self._client.log_batch(self._run_id, metrics=metrics_list, synchronous=False)
 
@@ -139,9 +138,7 @@ class MlflowMetricWriter(MetricWriter):
         pool.close()
         shutil.rmtree(temp_dir)
 
-    def _encode_and_log_video(
-        self, temp_dir: pathlib.Path, rel_path: str, video_array: Array
-    ):
+    def _encode_and_log_video(self, temp_dir: pathlib.Path, rel_path: str, video_array: Array):
         temp_path = temp_dir / rel_path
         # handle keys with slashes
         if not temp_path.parent.exists():
@@ -187,9 +184,7 @@ class MlflowMetricWriter(MetricWriter):
 
     def write_hparams(self, hparams: Mapping[str, Any]):
         """Log hyperparameters to MLflow."""
-        params = [
-            mlflow.entities.Param(key, str(value)) for key, value in hparams.items()
-        ]
+        params = [mlflow.entities.Param(key, str(value)) for key, value in hparams.items()]
         self._client.log_batch(self._run_id, params=params, synchronous=False)
 
     def flush(self):

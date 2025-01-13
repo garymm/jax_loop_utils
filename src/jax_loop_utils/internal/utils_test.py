@@ -13,9 +13,10 @@
 # limitations under the License.
 
 
-from absl.testing import absltest
-from jax_loop_utils.internal import utils
 import jax.numpy as jnp
+from absl.testing import absltest
+
+from jax_loop_utils.internal import utils
 
 
 class TestError(BaseException):
@@ -27,27 +28,24 @@ class HelpersTest(absltest.TestCase):
     def test_log_activity(
         self,
     ):
-        with self.assertLogs() as logs:
-            with utils.log_activity("test_activity"):
-                pass
+        with self.assertLogs() as logs, utils.log_activity("test_activity"):
+            pass
         self.assertLen(logs.output, 2)
         self.assertEqual(logs.output[0], "INFO:absl:test_activity ...")
-        self.assertRegex(
-            logs.output[1], r"^INFO:absl:test_activity finished after \d+.\d\ds.$"
-        )
+        self.assertRegex(logs.output[1], r"^INFO:absl:test_activity finished after \d+.\d\ds.$")
 
     def test_log_activity_fails(
         self,
     ):
-        with self.assertRaises(TestError):  # pylint: disable=g-error-prone-assert-raises, line-too-long
-            with self.assertLogs() as logs:
-                with utils.log_activity("test_activity"):
-                    raise TestError()
+        with (
+            self.assertRaises(TestError),
+            self.assertLogs() as logs,
+            utils.log_activity("test_activity"),
+        ):
+            raise TestError()
         self.assertLen(logs.output, 2)
         self.assertEqual(logs.output[0], "INFO:absl:test_activity ...")
-        self.assertRegex(
-            logs.output[1], r"^ERROR:absl:test_activity FAILED after \d+.\d\ds"
-        )
+        self.assertRegex(logs.output[1], r"^ERROR:absl:test_activity FAILED after \d+.\d\ds")
 
     def test_logged_with(self):
         @utils.logged_with("test_activity")
@@ -58,23 +56,18 @@ class HelpersTest(absltest.TestCase):
             test()
         self.assertLen(logs.output, 2)
         self.assertEqual(logs.output[0], "INFO:absl:test_activity ...")
-        self.assertRegex(
-            logs.output[1], r"^INFO:absl:test_activity finished after \d+.\d\ds.$"
-        )
+        self.assertRegex(logs.output[1], r"^INFO:absl:test_activity finished after \d+.\d\ds.$")
 
     def test_logged_with_fails(self):
         @utils.logged_with("test_activity")
         def test():
             raise TestError()
 
-        with self.assertRaises(TestError):  # pylint: disable=g-error-prone-assert-raises, line-too-long
-            with self.assertLogs() as logs:
-                test()
+        with self.assertRaises(TestError), self.assertLogs() as logs:
+            test()
         self.assertLen(logs.output, 2)
         self.assertEqual(logs.output[0], "INFO:absl:test_activity ...")
-        self.assertRegex(
-            logs.output[1], r"^ERROR:absl:test_activity FAILED after \d+.\d\ds"
-        )
+        self.assertRegex(logs.output[1], r"^ERROR:absl:test_activity FAILED after \d+.\d\ds")
 
     def test_check_param(self):
         a = jnp.array(0.0)

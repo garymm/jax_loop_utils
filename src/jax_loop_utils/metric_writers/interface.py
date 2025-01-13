@@ -148,11 +148,11 @@ class MetricWriter(abc.ABC):
           hparams: Flat mapping from hyper parameter name to value.
         """
 
-    def flush(self):
+    def flush(self):  # noqa: B027
         """Tells the MetricWriter to write out any cached values."""
         pass
 
-    def close(self):
+    def close(self):  # noqa: B027
         """Flushes and closes the MetricWriter.
 
         Calling any method on MetricWriter after MetricWriter.close()

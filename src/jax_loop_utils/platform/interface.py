@@ -68,7 +68,5 @@ class WorkUnit(abc.ABC):
         """Sets the status string for this task."""
 
     @abc.abstractmethod
-    def create_artifact(
-        self, artifact_type: ArtifactType, artifact: Any, description: str
-    ):
+    def create_artifact(self, artifact_type: ArtifactType, artifact: Any, description: str):
         """Creates an artifact entry for the work unit."""
