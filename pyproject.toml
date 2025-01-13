@@ -96,3 +96,7 @@ ignore = [
 
 [tool.pyright]
 typeCheckingMode = "standard"
+include = [
+    # TODO: Fix issues in adopted code and enable for all sources
+    "src/jax_loop_utils/metric_writers/",
+]
