@@ -16,6 +16,7 @@ import mlflow.protos.databricks_pb2
 import mlflow.tracking.fluent
 import numpy as np
 from absl import logging
+from mlflow.entities import RunTag
 
 from jax_loop_utils import asynclib
 from jax_loop_utils.metric_writers.interface import (
@@ -81,6 +82,12 @@ class MlflowMetricWriter(MetricWriter):
         self._run_id = self._client.create_run(
             experiment_id=experiment_id, run_name=run_name
         ).info.run_id
+
+    def write_tags(self, tags: dict[str, Any]):
+        """Set tags on the MLFlow run"""
+        self._client.log_batch(
+            self._run_id, [], [], [RunTag(k, str(v)) for k, v in tags.items()], synchronous=False
+        )
 
     def write_scalars(self, step: int, scalars: Mapping[str, Scalar]):
         """Write scalar metrics to MLflow."""
