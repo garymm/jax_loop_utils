@@ -121,9 +121,9 @@ Last release before dropping support for Python 3.8 and 3.9
     `jax.tree_util.tree_map`.
 -   Improvements to parameter overview.
 
-## Unreleased
+## v0.0.13
 
--   Fork from google/CommonLoopUtils (clu) to Astera-org/jax_loop_utils (jlu).
+-   Fork from google/CommonLoopUtils (clu) to garymm/jax_loop_utils (jax_loop_utils).
 -   Switch from setup.py to pyproject.toml + UV.
 -   Delete checkpoint module. It's specific to TensorFlow and Flax.
 -   Remove flax dependency from metrics module.
@@ -132,3 +132,5 @@ Last release before dropping support for Python 3.8 and 3.9
 -   Remove preprocess_spec, deterministic_data, and data modules.
     These all have TF dependencies and it seems they are probably
     deprecated by Google in favor of https://github.com/google/grain.
+-   Add MLflow metric writer.
+-   Add MemoryWriter for writing metrics to in-memory data structures.
