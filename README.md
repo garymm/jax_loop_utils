@@ -7,9 +7,9 @@ small libraries) without removing the flexibility required for research.
 To get started, check out [this Notebook](./synopsis.ipynb), or just:
 
 ```sh
-uv add jax_loop_utils
+uv add jax-loop-utils
 # or if you're not using UV
-pip install jax_loop_utils
+pip install jax-loop-utils
 ```
 
 See [pyproject.toml](pyproject.toml) for the optional dependencies, which are
