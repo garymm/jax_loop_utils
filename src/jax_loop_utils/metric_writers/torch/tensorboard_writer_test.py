@@ -55,9 +55,21 @@ def _load_histograms_data(logdir: str) -> dict[int, dict[str, Any]]:
                 data[event.step] = {}
             step_data = {}
             for value in event.summary.value:
-                print(" value:", value)
                 step_data[value.tag] = value.histo
             data[event.step].update(step_data)
+
+    return data
+
+
+def _load_images_data(logdir: str) -> dict[int, dict[str, Any]]:
+    """Loads image summaries from events in a logdir."""
+    paths = tf.io.gfile.glob(os.path.join(logdir, "events.out.tfevents.*"))
+    data = collections.defaultdict(dict)
+    for path in paths:
+        for event in tf.compat.v1.train.summary_iterator(path):
+            for value in event.summary.value:
+                if value.HasField("image"):
+                    data[event.step][value.tag] = value.image
 
     return data
 
@@ -103,6 +115,27 @@ class TensorboardWriterTest(tf.test.TestCase):
         self.assertNear(data[2]["a"].max, 0.5, 0.001)
         self.assertNear(data[2]["b"].min, 0.0, 0.001)
         self.assertNear(data[2]["b"].max, 0.7, 0.001)
+
+    def test_write_videos(self):
+        # Generate 100 frames of noise video
+        frames = []
+        for _ in range(100):
+            frame = np.random.randint(0, 256, (64, 64, 3), dtype=np.uint8)
+            frames.append(frame)
+
+        videos = {
+            "zzz/noise_0": np.stack(frames, axis=0),
+            "noise_1": np.stack(frames, axis=0),
+        }
+        self.writer.write_videos(0, videos)
+        self.writer.close()
+        data = _load_images_data(self.logdir)
+        self.assertIn("zzz/noise_0", data[0])
+        self.assertIn("noise_1", data[0])
+        self.assertEqual(data[0]["zzz/noise_0"].height, 64)
+        self.assertEqual(data[0]["zzz/noise_0"].width, 64)
+        self.assertEqual(data[0]["noise_1"].height, 64)
+        self.assertEqual(data[0]["noise_1"].width, 64)
 
 
 if __name__ == "__main__":

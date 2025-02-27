@@ -63,6 +63,7 @@ filterwarnings = [
     # See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#controlling-warnings
     # action:message:category:module:line
     "error",
+    "ignore:.*:SyntaxWarning:moviepy",
 ]
 
 [tool.ruff]

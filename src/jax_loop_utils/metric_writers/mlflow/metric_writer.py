@@ -109,14 +109,14 @@ class MlflowMetricWriter(MetricWriter):
             )
 
     def write_videos(self, step: int, videos: Mapping[str, Array]):
-        """Convert videos to images and write them to MLflow.
+        """Convert videos to files and write them to MLflow.
 
-        Requires pillow to be installed.
+        Requires the `audio-video` extra to be installed.
         """
         if _audio_video is None:
             logging.log_first_n(
                 logging.WARNING,
-                "MlflowMetricWriter.write_videos requires the [video] extra to be installed.",
+                "MlflowMetricWriter.write_videos requires the [audio-video] extra to be installed.",
                 1,
             )
             return

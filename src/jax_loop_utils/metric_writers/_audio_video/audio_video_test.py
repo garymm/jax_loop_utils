@@ -10,6 +10,7 @@ from jax_loop_utils.metric_writers._audio_video import (
     CONTAINER_FORMAT,
     FPS,
     encode_video,
+    encode_video_to_gif,
 )
 
 
@@ -27,7 +28,6 @@ class VideoTest(absltest.TestCase):
             encode_video(invalid_dtype, io.BytesIO())
 
     def test_encode_video_success(self):
-        """Test successful video encoding."""
         # Create a simple test video - red square moving diagonally
         T, H, W = 20, 63, 63  # test non-even dimensions
         video = np.zeros((T, H, W, 3), dtype=np.uint8)
@@ -48,8 +48,27 @@ class VideoTest(absltest.TestCase):
             frame_count = sum(1 for _ in container.decode(stream))
             self.assertEqual(frame_count, T)
 
+    def test_encode_video_to_gif(self):
+        # Create a simple test video - red square moving diagonally
+        T, H, W = 20, 63, 63  # test non-even dimensions
+        video = np.zeros((T, H, W, 3), dtype=np.uint8)
+        for t in range(T):
+            pos = t * 5  # Move 5 pixels each frame
+            video[t, pos : pos + 10, pos : pos + 10, 0] = 255  # Red square
+
+        output = io.BytesIO()
+        encode_video_to_gif(video, output)
+
+        output.seek(0)
+        with av.open(output, mode="r", format="gif") as container:
+            stream = container.streams.video[0]
+            self.assertEqual(stream.codec_context.width, W + 1)
+            self.assertEqual(stream.codec_context.height, H + 1)
+            # Check we can decode all frames
+            frame_count = sum(1 for _ in container.decode(stream))
+            self.assertEqual(frame_count, T)
+
     def test_encode_video_grayscale(self):
-        """Test encoding grayscale video (1 channel)."""
         T, H, W = 5, 32, 32
         video = np.zeros((T, H, W, 1), dtype=np.uint8)
 
