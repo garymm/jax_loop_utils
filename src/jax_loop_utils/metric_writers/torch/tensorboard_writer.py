@@ -21,6 +21,7 @@ Use this writer for the Pytorch-based code.
 from collections.abc import Mapping
 from typing import Any, Optional
 
+import numpy as np
 from absl import logging
 from torch.utils.tensorboard.writer import SummaryWriter
 
@@ -28,6 +29,11 @@ from jax_loop_utils.metric_writers import interface
 
 Array = interface.Array
 Scalar = interface.Scalar
+
+try:
+    from moviepy import editor as mpy
+except ImportError:
+    mpy = None
 
 
 class TensorboardWriter(interface.MetricWriter):
@@ -46,11 +52,23 @@ class TensorboardWriter(interface.MetricWriter):
             self._writer.add_image(key, value, global_step=step, dataformats="HWC")
 
     def write_videos(self, step: int, videos: Mapping[str, Array]):
-        logging.log_first_n(
-            logging.WARNING,
-            "torch.TensorboardWriter does not support writing videos.",
-            1,
-        )
+        # Note: moviepy is used internally by torch.utils.tensorboard.summary.make_video.
+        if mpy is None:
+            logging.log_first_n(
+                logging.WARNING,
+                "torch.TensorboardWriter.write_videos requires moviepy to be installed.",
+                1,
+            )
+            return
+        for key, value in videos.items():
+            if value.ndim != 4 or value.shape[-1] not in (1, 3):
+                raise ValueError(
+                    "Expected an array with shape (T, H, W, 1) or (T, H, W, 3)."
+                    f"Got shape {value.shape} with dtype {value.dtype}."
+                )
+            value = np.transpose(value, (0, 3, 1, 2))  # (T, H, W, C) -> (T, C, H, W)
+            value = np.expand_dims(value, axis=0)  # add batch dimension, expected by add_video
+            self._writer.add_video(key, value, global_step=step)
 
     def write_audios(self, step: int, audios: Mapping[str, Array], *, sample_rate: int):
         for key, value in audios.items():
