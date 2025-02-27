@@ -94,3 +94,12 @@ include = [
     # TODO: Fix issues in adopted code and enable for all sources
     "src/jax_loop_utils/metric_writers/",
 ]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+# we only need torch for the tensorboard writer
+torch = { index = "pytorch-cpu" }
