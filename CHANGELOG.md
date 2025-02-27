@@ -134,3 +134,7 @@ Last release before dropping support for Python 3.8 and 3.9
     deprecated by Google in favor of https://github.com/google/grain.
 -   Add MLflow metric writer.
 -   Add MemoryWriter for writing metrics to in-memory data structures.
+
+## v0.0.14
+
+-   Support write_videos for torch

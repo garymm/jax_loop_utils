@@ -31,7 +31,7 @@ jobs:
             src/jax_loop_utils/metric_writers/tf
       - name: pytest torch
         run: |
-          uv sync --group dev-torch --extra torch
+          uv sync --group dev-torch --extra torch --extra audio-video
           uv run -- pytest --capture=no --verbose --cov --cov-report=xml --cov-append \
             src/jax_loop_utils/metric_writers/torch
       - name: pytest mlflow

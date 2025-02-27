@@ -12,22 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""MetricWriter for Pytorch summary files.
+"""MetricWriter that uses PyTorch's SummaryWriter."""
 
-Use this writer for the Pytorch-based code.
-
-"""
-
+import io
 from collections.abc import Mapping
 from typing import Any, Optional
 
 from absl import logging
+from tensorboard.compat.proto.summary_pb2 import Summary
 from torch.utils.tensorboard.writer import SummaryWriter
 
+from jax_loop_utils import asynclib
 from jax_loop_utils.metric_writers import interface
 
 Array = interface.Array
 Scalar = interface.Scalar
+
+try:
+    from jax_loop_utils.metric_writers import _audio_video
+except ImportError:
+    _audio_video = None
+
+
+def _noop_decorator(func):
+    return func
 
 
 class TensorboardWriter(interface.MetricWriter):
@@ -46,11 +54,45 @@ class TensorboardWriter(interface.MetricWriter):
             self._writer.add_image(key, value, global_step=step, dataformats="HWC")
 
     def write_videos(self, step: int, videos: Mapping[str, Array]):
-        logging.log_first_n(
-            logging.WARNING,
-            "torch.TensorboardWriter does not support writing videos.",
-            1,
+        """Convert videos to GIFs and write them to Tensorboard.
+
+        Requires the `audio-video` extra to be installed.
+        """
+        if _audio_video is None:
+            logging.log_first_n(
+                logging.WARNING,
+                "MlflowMetricWriter.write_videos requires the [audio-video] extra to be installed.",
+                1,
+            )
+            return
+        # NOTE: not using self._writer.add_video because
+        # https://github.com/pytorch/pytorch/issues/147317
+        pool = asynclib.Pool()
+
+        if len(videos) > 1:
+            maybe_async = pool
+        else:
+            maybe_async = _noop_decorator
+
+        encode_and_log = maybe_async(self._encode_and_log_video)
+
+        for key, video_array in videos.items():
+            encode_and_log(key, video_array, step)
+
+        pool.close()
+
+    def _encode_and_log_video(self, key: str, video_array: Array, step: int):
+        f = io.BytesIO()
+        _audio_video.encode_video_to_gif(video_array, f)  # pyright: ignore[reportOptionalMemberAccess]
+        image = Summary.Image(  # pyright: ignore[reportAttributeAccessIssue]
+            height=video_array.shape[1],
+            width=video_array.shape[2],
+            colorspace=video_array.shape[3],
+            encoded_image_string=f.getvalue(),
         )
+        f.close()
+        summary = Summary(value=[Summary.Value(tag=key, image=image)])  # pyright: ignore[reportCallIssue,reportAttributeAccessIssue]
+        self._writer._get_file_writer().add_summary(summary, step, None)
 
     def write_audios(self, step: int, audios: Mapping[str, Array], *, sample_rate: int):
         for key, value in audios.items():

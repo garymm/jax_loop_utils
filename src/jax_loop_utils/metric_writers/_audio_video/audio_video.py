@@ -17,18 +17,7 @@ CODEC = "h264"
 FPS = 10
 
 
-def encode_video(video_array: Array, destination: io.IOBase):
-    """Encode a video array.
-
-    Encodes using CODEC and writes using CONTAINER_FORMAT at FPS frames per second.
-
-    Args:
-        video_array: array to encode. Must have shape (T, H, W, 1) or (T, H, W, 3),
-            where T is the number of frames, H is the height, W is the width, and the last
-            dimension is the number of channels.
-            Must be ints in [0, 255] or floats in [0, 1].
-        destination: Destination to write the encoded video.
-    """
+def _preprocess_video_array(video_array: Array) -> np.ndarray:
     video_array = np.array(video_array)
     if video_array.ndim != 4 or video_array.shape[-1] not in (1, 3):
         raise ValueError(
@@ -53,6 +42,28 @@ def encode_video(video_array: Array, destination: io.IOBase):
             "Expected video_array to be floats in [0, 1] "
             f"or ints in [0, 255], got {video_array.dtype}"
         )
+    return video_array
+
+
+def encode_video(
+    video_array: Array,
+    destination: io.IOBase,
+    container_format: str = CONTAINER_FORMAT,
+    codec: str = CODEC,
+    fps: int = FPS,
+):
+    """Encode a video array.
+
+    Encodes using CODEC and writes using CONTAINER_FORMAT at FPS frames per second.
+
+    Args:
+        video_array: array to encode. Must have shape (T, H, W, 1) or (T, H, W, 3),
+            where T is the number of frames, H is the height, W is the width, and the last
+            dimension is the number of channels.
+            Must be ints in [0, 255] or floats in [0, 1].
+        destination: Destination to write the encoded video.
+    """
+    video_array = _preprocess_video_array(video_array)
 
     T, H, W, C = video_array.shape
     # Pad height and width to even numbers if necessary
@@ -68,11 +79,10 @@ def encode_video(video_array: Array, destination: io.IOBase):
     if is_grayscale:
         video_array = np.squeeze(video_array, axis=-1)
 
-    with av.open(destination, mode="w", format=CONTAINER_FORMAT) as container:
-        stream = container.add_stream(CODEC, rate=FPS)
-        stream.width = W
-        stream.height = H
-        stream.pix_fmt = "yuv420p"
+    with av.open(destination, mode="w", format=container_format) as container:
+        pix_fmt = "rgb8" if codec == "gif" else "yuv420p"
+        stream = container.add_stream(codec, width=W, height=H, pix_fmt=pix_fmt, rate=fps)
+        assert isinstance(stream, av.VideoStream)
 
         for t in range(T):
             frame_data = video_array[t]
@@ -85,3 +95,15 @@ def encode_video(video_array: Array, destination: io.IOBase):
             container.mux(stream.encode(frame))
 
         container.mux(stream.encode(None))
+
+
+def encode_video_to_gif(video_array: Array, destination: io.IOBase):
+    """Encode a video array to a gif.
+
+    Args:
+        video_array: array to encode. Must have shape (T, H, W, 1) or (T, H, W, 3),
+            where T is the number of frames, H is the height, W is the width, and the last
+            dimension is the number of channels.
+        destination: Destination to write the encoded video.
+    """
+    encode_video(video_array, destination, container_format="gif", codec="gif")
