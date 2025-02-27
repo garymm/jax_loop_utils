@@ -1,6 +1,6 @@
 [project]
 name = "jax_loop_utils"
-version = "0.0.12"
+version = "0.0.13"
 description = "Libraries for ML training loops in JAX."
 readme = "README.md"
 requires-python = ">=3.11"
