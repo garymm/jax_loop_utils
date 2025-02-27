@@ -46,11 +46,9 @@ jobs:
             src/jax_loop_utils/metric_writers/_audio_video
       - name: Upload coverage reports to Codecov
         if: always()
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: Astera-org/jax_loop_utils
-          verbose: true
 
   format:
     runs-on: ubuntu-24.04
