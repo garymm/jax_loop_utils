@@ -5,7 +5,7 @@ description = "Libraries for ML training loops in JAX."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache 2.0" }
-authors = [{ name = "Astera Institute", email = "no-reply@astera.org" }]
+authors = [{ name = "Gary Miguel", email = "garymm@garymm.org" }]
 dependencies = [
     "absl-py",
     "etils[epath,epy]",
@@ -25,7 +25,7 @@ classifiers = [
 keywords = ["JAX", "machine learning"]
 
 [project.urls]
-Homepage = "http://github.com/Astera-org/jax_loop_utils"
+Homepage = "http://github.com/garymm/jax_loop_utils"
 
 [project.optional-dependencies]
 mlflow = ["mlflow-skinny>=2.0", "Pillow"]
